@@ -1,0 +1,28 @@
+.main {
+  --datagrid-rows-height: 400px;
+  --datagrid-row-height: 25px;
+  display: block;
+  border: solid 1px #ccc;
+  user-select: none;
+}
+
+.table {
+  height: var(--datagrid-rows-height);
+  overflow: hidden;
+  position: relative;
+}
+
+.row {
+  box-sizing: border-box;
+  height: var(--datagrid-row-height);
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.cell {
+  box-sizing: border-box;
+  box-shadow: 0 0 0px 0.5px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  padding: 0.3rem;
+}

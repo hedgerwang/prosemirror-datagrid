@@ -8,39 +8,51 @@ import { schema as baseSchema } from 'prosemirror-schema-basic';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { undo, redo, history } from 'prosemirror-history';
-
-const SCHEMA = new Schema({
-  nodes: baseSchema.spec.nodes,
-  marks: baseSchema.spec.marks,
-});
-
-const DOC_JSON = {
-  type: 'doc',
-  content: [
-    {
-      type: 'paragraph',
-      content: [
-        {
-          type: 'text',
-          text: 'hello',
-        },
-      ],
-    },
-  ],
-};
-
-const PLUGINS: Array<Plugin> = [
-  history(),
-  keymap({ 'Mod-z': undo, 'Mod-y': redo }),
-  keymap(baseKeymap),
-];
+import { createNodesSpec, NODE_NAME } from '../datagrid/DatagridNodeSpec';
+import insertDataGrid from '../datagrid/InsertDataGrid';
+import { createDataGridNodeViewsRenderingMap } from '../datagrid/DataGridNodeView';
 
 function createEditorState() {
-  return EditorState.create({
-    doc: SCHEMA.nodeFromJSON(DOC_JSON),
-    schema: SCHEMA,
-    plugins: PLUGINS,
+  const nodes: any = baseSchema.spec.nodes;
+
+  const schema = new Schema({
+    nodes: nodes.append(createNodesSpec({})),
+    marks: baseSchema.spec.marks,
   });
+
+  const plugins = [
+    history(),
+    keymap({ 'Mod-z': undo, 'Mod-y': redo }),
+    keymap(baseKeymap),
+  ];
+
+  const state = EditorState.create({
+    doc: schema.nodeFromJSON({ type: 'doc' }),
+    schema: schema,
+    plugins,
+  });
+
+  let { tr } = state;
+  tr = tr.insertText('some text here');
+  tr = insertDataGrid(state.schema, tr);
+  tr = tr.insertText('some text here some text here some text here');
+  // tr = insertDataGrid(state.schema, tr);
+  tr = tr.insertText('some text here');
+
+  return state.apply(tr);
+}
+
+function createEditorView(el: HTMLElement) {
+  const editorState = createEditorState();
+  const editorView = new EditorView(el, {
+    state: editorState,
+    nodeViews: { ...createDataGridNodeViewsRenderingMap() },
+    dispatchTransaction(transaction: Transaction) {
+      const newState = editorView.state.apply(transaction);
+      editorView.updateState(newState);
+    },
+  });
+  return editorView;
 }
 
 export default function ExampleApp() {
@@ -49,16 +61,7 @@ export default function ExampleApp() {
   useLayoutEffect(() => {
     const el = editorParentRef.current;
     if (el) {
-      const editorState = createEditorState();
-      const editorView = new EditorView(el, {
-        state: editorState,
-        nodeViews: {},
-        dispatchTransaction(transaction: Transaction) {
-          const newState = editorView.state.apply(transaction);
-          editorView.updateState(newState);
-        },
-      });
-
+      const editorView = createEditorView(el);
       const timer = setTimeout(() => {
         editorView.focus();
       }, 200);
