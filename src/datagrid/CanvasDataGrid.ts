@@ -7,9 +7,8 @@ import DOMEventsHandler from './DOMEventsHandler';
 import clamp from './clamp';
 import SegmentList from './SegmentList';
 import Box from './Box';
-import CanvasDataGridStyle from './CanvasDataGridStyle';
-import CanvasDataGridSetting from './CanvasDataGridSetting';
 import renderCanvasDataGrid from './renderCanvasDataGrid';
+import CanvasDataGridConfig from './CanvasDataGridConfig';
 
 export type Props = {
   node: ProsemirrorNode;
@@ -50,14 +49,15 @@ export default class CanvasDataGrid {
   _canvasBox: Box;
   _rows: SegmentList;
   _cols: SegmentList;
-  _style: CanvasDataGridStyle;
-  _setting: CanvasDataGridSetting;
+  _config: CanvasDataGridConfig;
+  _lastRenderedAt = 0;
+  _fps = 60;
 
   constructor(props: Props) {
     this.props = props;
 
-    this._setting = new CanvasDataGridSetting();
-    this._style = new CanvasDataGridStyle();
+    const config = new CanvasDataGridConfig();
+    this._config = config;
 
     const dom = document.createElement('div');
     dom.tabIndex = 0;
@@ -79,7 +79,7 @@ export default class CanvasDataGrid {
 
     this._rows = new SegmentList(DEFAULT_ROW_HEIGHT);
     this._cols = new SegmentList(DEFAULT_COL_WIDTH);
-    this._cols.setSize(0, this._setting.indexColumnWidth);
+    this._cols.setSize(0, config.indexColumnWidth);
     // this._rows.setSize(0, 40);
     // this._rows.setSize(5, 200);
     this._renderCanvas();
@@ -113,7 +113,7 @@ export default class CanvasDataGrid {
     let canvasBox = this._canvasBox;
     const { deltaY, deltaX } = e;
 
-    if (this._setting.snapToGrid) {
+    if (this._config.snapToGrid) {
       const row = this._rows.view(canvasBox.y, canvasBox.y + 1)[0];
       if (row) {
         if (deltaY > 0) {
@@ -162,7 +162,17 @@ export default class CanvasDataGrid {
 
     if (!canvasBox.equals(this._canvasBox)) {
       this._canvasBox = canvasBox;
-      window.requestAnimationFrame(this._renderCanvas);
+      window.requestAnimationFrame(() => {
+        if (!this._lastRenderedAt) {
+          this._lastRenderedAt = performance.now();
+          this._fps = 60;
+        }
+        this._renderCanvas();
+        const now = performance.now();
+        const secs = (now - this._lastRenderedAt) / 1000;
+        this._lastRenderedAt = now;
+        this._fps = clamp(1 / secs, 0, 60);
+      });
     }
   };
 
@@ -170,10 +180,10 @@ export default class CanvasDataGrid {
     renderCanvasDataGrid(
       this._canvas,
       this._canvasBox,
-      this._style,
-      this._setting,
+      this._config,
       this._rows,
       this._cols,
+      this._fps,
     );
   };
 }

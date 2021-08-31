@@ -1,12 +1,19 @@
 .main {
-  border: solid 1px #ccc;
+  display: block;
+  font-size: 0;
+  line-height: 0;
+  background: #ccc;
+  outline: solid 1px #ccc;
 }
 
 .main:focus {
   outline: none;
-  border-color: blue;
+  outline: solid 1px blue;
 }
 
 .canvas {
-  outline: solid 1px purple;
+  background: #fff;
+  border: none;
+  outline: none;
+  margin: 0;
 }

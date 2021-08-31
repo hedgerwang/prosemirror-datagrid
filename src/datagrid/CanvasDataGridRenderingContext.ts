@@ -1,17 +1,19 @@
-import CanvasDataGridStyle from './CanvasDataGridStyle';
+import CanvasDataGridConfig from './CanvasDataGridConfig';
+import nullthrows from 'nullthrows';
+import Box from './Box';
 
 export default class DeviceRenderingContext {
   ctx: CanvasRenderingContext2D;
   dpi: number;
 
-  constructor(
-    ctx: CanvasRenderingContext2D,
-    dpi: number,
-    style: CanvasDataGridStyle,
-  ) {
+  constructor(ctx: CanvasRenderingContext2D, config: CanvasDataGridConfig) {
+    const dpi = window.devicePixelRatio;
     this.ctx = ctx;
     this.dpi = dpi;
-    ctx.font = `${style.textSize * dpi}px Arial`;
+  }
+
+  set font(val: string) {
+    this.ctx.font = val;
   }
 
   set strokeStyle(val: string) {

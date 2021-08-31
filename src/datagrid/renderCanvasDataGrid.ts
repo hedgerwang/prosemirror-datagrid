@@ -1,41 +1,66 @@
-import CanvasDataGridStyle from './CanvasDataGridStyle';
-import CanvasDataGridSetting from './CanvasDataGridSetting';
 import CanvasDataGridRenderingContext from './CanvasDataGridRenderingContext';
 import Box from './Box';
 import nullthrows from 'nullthrows';
 import SegmentList from './SegmentList';
+import CanvasDataGridConfig from './CanvasDataGridConfig';
+
+function setCanvasSize(
+  canvas: HTMLCanvasElement,
+  canvasBox: Box,
+  ctx: CanvasDataGridRenderingContext,
+) {
+  const { dpi } = ctx;
+  canvas.width = canvasBox.w * dpi;
+  canvas.height = canvasBox.h * dpi;
+  canvas.style.width = canvasBox.w + 'px';
+  canvas.style.height = canvasBox.h + 'px';
+}
+
+function applyTextStyle(
+  ctx: CanvasDataGridRenderingContext,
+  config: CanvasDataGridConfig,
+) {
+  ctx.font = `${config.textSize * ctx.dpi}px Arial`;
+}
+
+function renderCellText(
+  ctx: CanvasDataGridRenderingContext,
+  config: CanvasDataGridConfig,
+  text: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+) {
+  const { cellPadding, textSize } = config;
+  applyTextStyle(ctx, config);
+  ctx.fillText(text, x + cellPadding, y + cellPadding + textSize);
+}
 
 export default function renderCanvasDataGrid(
   canvas: HTMLCanvasElement,
   canvasBox: Box,
-  style: CanvasDataGridStyle,
-  setting: CanvasDataGridSetting,
+  config: CanvasDataGridConfig,
   rowsLayout: SegmentList,
   colsLayout: SegmentList,
+  fps: number,
 ) {
-  const { fixedColsCount, fixedRowsCount } = setting;
-
   const {
     shadowBlur,
     shadowColor,
     fixedColBGColor,
     fixedRowBGColor,
     textColor,
-  } = style;
-
-  const dpi = window.devicePixelRatio;
-
-  // Canvas.
-  canvas.width = canvasBox.w * dpi;
-  canvas.height = canvasBox.h * dpi;
-  canvas.style.width = canvasBox.w + 'px';
-  canvas.style.height = canvasBox.h + 'px';
+    fixedColsCount,
+    fixedRowsCount,
+  } = config;
 
   const ctx = new CanvasDataGridRenderingContext(
-    nullthrows(canvas.getContext('2d')),
-    dpi,
-    style,
+    nullthrows(nullthrows(canvas.getContext('2d'))),
+    config,
   );
+
+  setCanvasSize(canvas, canvasBox, ctx);
 
   ctx.clearRect(0, 0, canvasBox.w, canvasBox.h);
   ctx.strokeStyle = 'solid';
@@ -68,7 +93,7 @@ export default function renderCanvasDataGrid(
       ctx.moveTo(toX, fromY);
       ctx.lineTo(toX, toY);
       const text = `${rr}, ${cc}`;
-      renderCellText(ctx, style, text, fromX, fromY, ww, hh);
+      renderCellText(ctx, config, text, fromX, fromY, ww, hh);
     });
   });
   ctx.closePath();
@@ -111,7 +136,7 @@ export default function renderCanvasDataGrid(
       ctx.lineTo(toX, toY);
       const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
       ctx.fillStyle = textColor;
-      renderCellText(ctx, style, text, fromX, fromY, ww, hh);
+      renderCellText(ctx, config, text, fromX, fromY, ww, hh);
     });
     ctx.closePath();
     ctx.stroke();
@@ -152,7 +177,7 @@ export default function renderCanvasDataGrid(
       ctx.lineTo(toX, toY);
       const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
       ctx.fillStyle = textColor;
-      renderCellText(ctx, style, text, fromX, fromY, ww, hh);
+      renderCellText(ctx, config, text, fromX, fromY, ww, hh);
     });
     ctx.closePath();
     ctx.stroke();
@@ -182,22 +207,20 @@ export default function renderCanvasDataGrid(
       ctx.lineTo(toX, toY);
       const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
       ctx.fillStyle = textColor;
-      renderCellText(ctx, style, text, fromX, fromY, ww, hh);
+      renderCellText(ctx, config, text, fromX, fromY, ww, hh);
       ctx.closePath();
       ctx.stroke();
     }
   }
-}
 
-function renderCellText(
-  ctx: CanvasDataGridRenderingContext,
-  style: CanvasDataGridStyle,
-  text: string,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-) {
-  const { cellPadding, textSize } = style;
-  ctx.fillText(text, x + cellPadding, y + cellPadding + textSize);
+  // DEV
+  const { devMode } = config;
+  if (devMode) {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    const devBox = new Box(canvasBox.w - 60, canvasBox.h - 25, 60, 25);
+    ctx.fillRect(devBox.x, devBox.y, devBox.w, devBox.h);
+    const text = `fps = ${fps | 0}`;
+    ctx.fillStyle = '#fff';
+    ctx.fillText(text, devBox.x + 8, devBox.y + 16);
+  }
 }
