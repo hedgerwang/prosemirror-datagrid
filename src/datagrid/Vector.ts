@@ -1,21 +1,17 @@
 export default class Vector {
-  _x: number;
-  _y: number;
+  x: number;
+  y: number;
 
   constructor(x: number, y: number) {
-    this._x = x;
-    this._y = y;
+    this.x = x;
+    this.y = y;
   }
 
-  get x() {
-    return this._x;
-  }
-
-  get y() {
-    return this._y;
+  equals(val: Vector): boolean {
+    return val.x === this.x && val.y === this.y;
   }
 
   toString() {
-    return `Vector(${this._x}, ${this._y})`;
+    return `Vector(${this.x}, ${this.y})`;
   }
 }

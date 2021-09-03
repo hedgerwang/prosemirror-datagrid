@@ -2,6 +2,9 @@ import CanvasDataGridConfig from './CanvasDataGridConfig';
 import nullthrows from 'nullthrows';
 import Box from './Box';
 
+// "12px Arial"
+const RE_FONT_VALUE = /^(\d+)px\s([A-ZA-z\s]+)$/;
+
 export default class DeviceRenderingContext {
   ctx: CanvasRenderingContext2D;
   dpi: number;
@@ -13,15 +16,25 @@ export default class DeviceRenderingContext {
   }
 
   set font(val: string) {
-    this.ctx.font = val;
+    const matches = val.match(RE_FONT_VALUE);
+    if (!matches) {
+      throw new Error(`unsupport font. expect "12px Arial"`);
+    }
+    const { dpi } = this;
+    const fontSize = parseInt(matches[1], 10);
+    const fontType = matches[2];
+    const font = `${fontSize * dpi}px ${fontType}`;
+    this.ctx.font = font;
   }
 
   set strokeStyle(val: string) {
     this.ctx.strokeStyle = val;
   }
 
+  // Lines can be drawn with the stroke(), strokeRect(), and strokeText()
+  // methods.
   set lineWidth(val: number) {
-    this.ctx.lineWidth = val;
+    this.ctx.lineWidth = val * this.dpi;
   }
 
   set fillStyle(val: string) {
@@ -29,7 +42,7 @@ export default class DeviceRenderingContext {
   }
 
   set shadowBlur(val: number) {
-    this.ctx.shadowBlur = val;
+    this.ctx.shadowBlur = val * this.dpi;
   }
 
   set shadowColor(val: string) {
@@ -48,6 +61,11 @@ export default class DeviceRenderingContext {
   clearRect(x: number, y: number, w: number, h: number) {
     const { ctx, dpi } = this;
     ctx.clearRect(x * dpi, y * dpi, w * dpi, h * dpi);
+  }
+
+  strokeRect(x: number, y: number, w: number, h: number) {
+    const { ctx, dpi } = this;
+    ctx.strokeRect(x * dpi, y * dpi, w * dpi, h * dpi);
   }
 
   fillRect(x: number, y: number, w: number, h: number) {

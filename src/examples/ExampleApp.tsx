@@ -9,7 +9,7 @@ import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { undo, redo, history } from 'prosemirror-history';
 import { createNodesSpec, NODE_NAME } from '../datagrid/DatagridNodeSpec';
-import insertDataGrid from '../datagrid/InsertDataGrid';
+import insertDataGrid from '../datagrid/insertDataGrid';
 import { createDataGridNodeViewsRenderingMap } from '../datagrid/DataGridNodeView';
 
 function createEditorState() {

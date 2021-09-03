@@ -62,6 +62,7 @@ export default class SegmentList {
     return this;
   }
 
+  // View within range.
   view(from: number, to: number): Segment[] {
     const result: Segment[] = [];
     const size = this._defaultSegmentSize;
@@ -87,5 +88,28 @@ export default class SegmentList {
       }
     }
     return result;
+  }
+
+  //  at point.
+  point(pos: number): Segment | null {
+    let left = 0;
+    let right = MAX_LENGTH;
+    while (true) {
+      const middle = ((left + right) / 2) | 0;
+      const seg = this.peekAt(middle);
+      if (pos >= seg.from && pos <= seg.to) {
+        return seg;
+      }
+      // console.log(pos, seg, left, right, middle);
+      if (pos <= seg.from) {
+        right = middle;
+      }
+      if (pos >= seg.to) {
+        left = middle;
+      }
+      if (left === right) {
+        return null;
+      }
+    }
   }
 }
