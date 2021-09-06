@@ -1,6 +1,6 @@
 import Vector from './Vector';
 
-export default class CanvasDataGridSelection {
+export default class CellSelection {
   anchor: Vector;
   focus: Vector;
 
@@ -9,7 +9,7 @@ export default class CanvasDataGridSelection {
     this.focus = focus || anchor;
   }
 
-  equals(val: CanvasDataGridSelection): boolean {
+  equals(val: CellSelection): boolean {
     return val.anchor.equals(this.anchor) && val.focus.equals(this.focus);
   }
 }

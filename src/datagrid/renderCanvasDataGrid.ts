@@ -3,7 +3,8 @@ import Box from './Box';
 import nullthrows from 'nullthrows';
 import SegmentList from './SegmentList';
 import CanvasDataGridConfig from './CanvasDataGridConfig';
-import CanvasDataGridSelection from './CanvasDataGridSelection';
+import CellSelection from './CellSelection';
+import CanvasDataGridState from './CanvasDataGridState';
 
 type CellStyle = {
   bgColor?: string | null;
@@ -26,7 +27,7 @@ function renderCell(
   ctx: CanvasDataGridRenderingContext,
   config: CanvasDataGridConfig,
   cellBox: Box,
-  text: string | null,
+  text: string,
   style?: CellStyle,
 ) {
   const {
@@ -73,15 +74,8 @@ function renderFixedShadow(
   ctx.shadowBlur = 0;
 }
 
-export default function renderCanvasDataGrid(
-  canvas: HTMLCanvasElement,
-  canvasBox: Box,
-  config: CanvasDataGridConfig,
-  rowsLayout: SegmentList,
-  colsLayout: SegmentList,
-  selection: CanvasDataGridSelection,
-  fps: number,
-) {
+export default function renderCanvasDataGrid(state: CanvasDataGridState) {
+  const { canvas, canvasBox, config, selection, rows, cols, fps } = state;
   const {
     cellBGColor,
     cellBorderColor,
@@ -98,7 +92,7 @@ export default function renderCanvasDataGrid(
 
   const anchorCol = selection.anchor.x;
   const anchorRow = selection.anchor.y;
-  let anchorRect: Box | null = null;
+  let anchorBox: Box | null = null;
 
   const ctx = new CanvasDataGridRenderingContext(
     nullthrows(nullthrows(canvas.getContext('2d'))),
@@ -115,15 +109,15 @@ export default function renderCanvasDataGrid(
   const { w, h } = canvasBox;
   const { x, y } = canvasBox;
 
-  const rows = rowsLayout.view(y, y + h);
-  const cols = colsLayout.view(x, x + w);
+  const rowsVisible = rows.view(y, y + h);
+  const colsVisible = cols.view(x, x + w);
 
   // Non-Fixed Cells.
-  rows.forEach((row) => {
+  rowsVisible.forEach((row) => {
     const hh = row.to - row.from;
     const fromY = row.from - y;
     const toY = fromY + hh;
-    cols.forEach((col) => {
+    colsVisible.forEach((col) => {
       const rr = row.index;
       const cc = col.index;
       if (rr < fixedRowsCount || cc < fixedColsCount) {
@@ -134,23 +128,24 @@ export default function renderCanvasDataGrid(
 
       // selected cell background.
       const selected = anchorCol === cc && anchorRow === rr;
+      let cellStyle;
       if (selected) {
-        anchorRect = new Box(fromX, fromY, ww, hh);
-        renderCell(ctx, config, anchorRect, null, {
+        anchorBox = new Box(fromX, fromY, ww, hh);
+        cellStyle = {
           bgColor: selectionBGColor,
-        });
+        };
       }
 
       const text = `${selected} ${rr}, ${cc}`;
-      renderCell(ctx, config, new Box(fromX, fromY, ww, hh), text);
+      renderCell(ctx, config, new Box(fromX, fromY, ww, hh), text, cellStyle);
     });
   });
   ctx.closePath();
   ctx.stroke();
 
   // Anchor Selection Border for non-fixed cells.
-  if (anchorRect) {
-    const { x, y, w, h } = anchorRect;
+  if (anchorBox) {
+    const { x, y, w, h } = anchorBox;
     ctx.lineWidth = 2;
     ctx.strokeStyle = selectionBorderColor;
     ctx.strokeRect(x, y, w, h);
@@ -158,7 +153,7 @@ export default function renderCanvasDataGrid(
 
   // Fixed col cells drop-shadow.
   if (x > 0 && fixedColsCount > 0) {
-    const lastCol = colsLayout.peekAt(fixedColsCount - 1);
+    const lastCol = cols.peekAt(fixedColsCount - 1);
     renderFixedShadow(ctx, config, new Box(0, 0, lastCol.to, canvasBox.h));
   }
 
@@ -167,28 +162,32 @@ export default function renderCanvasDataGrid(
     bgColor: fixedColBGColor,
   };
   for (let cc = 0; cc < fixedColsCount; cc++) {
-    const col = colsLayout.peekAt(cc);
+    const col = cols.peekAt(cc);
     ctx.clearRect(col.from, 0, col.to - col.from, canvasBox.h);
     ctx.beginPath();
-    rows.forEach((row) => {
+    rowsVisible.forEach((row) => {
+      const cc = col.index;
       const rr = row.index;
       if (rr < fixedRowsCount) {
         return;
       }
+      const selected = anchorCol === cc && anchorRow === rr;
       const hh = row.to - row.from;
-      const cc = col.index;
       const fromX = col.from;
       const fromY = row.from - y;
       const toX = col.to;
       const ww = toX - fromX;
       const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
-      renderCell(
-        ctx,
-        config,
-        new Box(fromX, fromY, ww, hh),
-        text,
-        fixedColStyle,
-      );
+      const cellBox = new Box(fromX, fromY, ww, hh);
+      let cellStyle = fixedColStyle;
+      if (selected) {
+        anchorBox = cellBox;
+        cellStyle = {
+          ...fixedColStyle,
+          bgColor: selectionBGColor,
+        };
+      }
+      renderCell(ctx, config, cellBox, text, cellStyle);
     });
     ctx.closePath();
     ctx.stroke();
@@ -196,7 +195,7 @@ export default function renderCanvasDataGrid(
 
   // Fixed row cells drop-shadow.
   if (y > 0 && fixedRowsCount > 0) {
-    const lastRow = rowsLayout.peekAt(fixedRowsCount - 1);
+    const lastRow = rows.peekAt(fixedRowsCount - 1);
     renderFixedShadow(ctx, config, new Box(0, 0, canvasBox.w, lastRow.to));
   }
 
@@ -205,13 +204,13 @@ export default function renderCanvasDataGrid(
     bgColor: fixedRowBGColor,
   };
   for (let rr = 0; rr < fixedRowsCount; rr++) {
-    const row = rowsLayout.peekAt(rr);
+    const row = rows.peekAt(rr);
     const fromY = row.from;
     const toY = row.to;
     const hh = toY - fromY;
     ctx.clearRect(0, fromY, canvasBox.w, hh);
     ctx.beginPath();
-    cols.forEach((col) => {
+    colsVisible.forEach((col) => {
       const cc = col.index;
       if (cc < fixedColsCount) {
         return;
@@ -220,13 +219,17 @@ export default function renderCanvasDataGrid(
       const toX = col.to - x;
       const ww = toX - fromX;
       const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
-      renderCell(
-        ctx,
-        config,
-        new Box(fromX, fromY, ww, hh),
-        text,
-        fixedRowCellStyle,
-      );
+      let cellStyle = fixedRowCellStyle;
+      const selected = anchorCol === cc && anchorRow === rr;
+      const cellBox = new Box(fromX, fromY, ww, hh);
+      if (selected) {
+        cellStyle = {
+          ...cellStyle,
+          bgColor: selectionBGColor,
+        };
+        anchorBox = cellBox;
+      }
+      renderCell(ctx, config, cellBox, text, cellStyle);
     });
     ctx.closePath();
     ctx.stroke();
@@ -234,9 +237,9 @@ export default function renderCanvasDataGrid(
 
   // Fixed Corner Cells.
   for (let rr = 0; rr < fixedRowsCount; rr++) {
-    const row = rowsLayout.peekAt(rr);
+    const row = rows.peekAt(rr);
     for (let cc = 0; cc < fixedColsCount; cc++) {
-      const col = colsLayout.peekAt(cc);
+      const col = cols.peekAt(cc);
       const fromX = col.from;
       const toX = col.to;
       const fromY = row.from;

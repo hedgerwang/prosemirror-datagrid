@@ -1,16 +1,14 @@
-import Box from './Box';
-import SegmentList from './SegmentList';
 import Vector from './Vector';
-import CanvasDataGridConfig from './CanvasDataGridConfig';
+import CanvasDataGridState from './CanvasDataGridState';
 
 export default function findCellAtPoint(
-  config: CanvasDataGridConfig,
-  canvasBox: Box,
-  cols: SegmentList,
-  rows: SegmentList,
+  state: CanvasDataGridState,
   point: Vector,
 ): Vector | null {
+  const { config, canvasBox, cols, rows } = state;
+
   let col;
+
   let row;
   const { fixedColsCount, fixedRowsCount } = config;
   if (fixedColsCount) {
@@ -21,7 +19,7 @@ export default function findCellAtPoint(
   }
 
   if (fixedRowsCount) {
-    row = cols.point(point.y);
+    row = rows.point(point.y);
     if (row && row.index > fixedRowsCount - 1) {
       row = null;
     }
