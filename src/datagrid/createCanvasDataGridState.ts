@@ -7,7 +7,7 @@ import { Decoration } from 'prosemirror-view';
 import { EditorView } from 'prosemirror-view';
 import CellSelection from './CellSelection';
 import Vector from './Vector';
-import { ReducerDispatch } from './reducer';
+import { ReducerDispatch } from './canvasDataGridReducer';
 import CellEditor from './CellEditor';
 import type { CanvasDataGridState } from './CanvasDataGridState';
 
@@ -59,15 +59,17 @@ export default function createCanvasDataGridState(props: {
   return {
     canvas,
     canvasBox,
+    cellEditor,
     cols,
     config,
     dom,
-    isEditingCell: false,
     fps: 60,
+    isEditingCell: false,
     lastRenderedAt: 0,
+    maxColIndex: 1000,
+    maxRowIndex: 1000,
     proseMirror,
     rows,
     selection,
-    cellEditor,
   };
 }

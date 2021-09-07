@@ -14,13 +14,33 @@ import type {
   CanvasDataGridState,
   ProsemirrorProps,
 } from './CanvasDataGridState';
-import type { ReducerAction, ReducerDispatch } from './reducer';
-import reducer from './reducer';
+import type { ReducerAction, ReducerDispatch } from './canvasDataGridReducer';
+import reducer from './canvasDataGridReducer';
 import createCanvasDataGridState from './createCanvasDataGridState';
+import { TextSelection } from 'prosemirror-state';
 
-function renderDOMAttributes(state: CanvasDataGridState) {
+const A_Z_KEY = /^[a-zA-Z0-9]$/;
+
+function focusElement(el: Element, delay?: number) {
+  if (el instanceof HTMLElement) {
+    if (delay) {
+      setTimeout(() => {
+        el.focus();
+      }, delay || 0);
+    } else {
+      el.focus();
+    }
+  }
+}
+
+function renderDOM(state: CanvasDataGridState) {
   const { proseMirror, dom } = state;
   const { node } = proseMirror;
+  const el: any = dom;
+  if (el.__proseMirrorNode === node) {
+    return;
+  }
+  el.__proseMirrorNode = node;
   const domAttrs = toDOMAttributes(node);
   Object.keys(domAttrs).forEach((name) => {
     if (name === 'className') {
@@ -55,64 +75,108 @@ function createDOMEventsHandler(
   const domEventsHandler = new DOMEventsHandler();
   domEventsHandler.onWheel(dom, datagrid.onWheel, true);
   domEventsHandler.onMouseDown(dom, datagrid.onMouseDown, true);
+  domEventsHandler.onKeyDown(dom, datagrid.onKeyDown, true);
   return domEventsHandler;
 }
 
-export default class CanvasDataGrid {
-  // Public.
-  state: CanvasDataGridState;
+function shouldHandleEvent(e: Event, state: CanvasDataGridState) {
+  const { dom, canvas, isEditingCell } = state;
+  const { target } = e;
+  return !isEditingCell || dom === target || canvas === target;
+}
 
-  // Members.
-  domEventsHandler: DOMEventsHandler;
-
-  constructor(proseMirror: ProsemirrorProps) {
-    this.state = createCanvasDataGridState({ proseMirror });
-    this.domEventsHandler = createDOMEventsHandler(this.state.dom, this);
-    renderDOMAttributes(this.state);
-    renderCanvasDataGrid(this.state);
+function onKeyDown(
+  e: KeyboardEvent,
+  state: CanvasDataGridState,
+  dispatch: ReducerDispatch,
+) {
+  if (!shouldHandleEvent(e, state)) {
+    return;
   }
 
-  dispatch = (action: ReducerAction) => {
-    const nextState = reducer(action, this.state);
-    if (!nextState) {
-      return;
+  e.preventDefault();
+
+  const { proseMirror, selection, maxColIndex, maxRowIndex } = state;
+  const { getPos, view } = proseMirror;
+  const { key, ctrlKey, metaKey } = e;
+
+  if (key === 'Escape') {
+    const pos = typeof getPos === 'function' ? getPos() : 0;
+    if (pos > 0) {
+      const delta = e.shiftKey ? -1 : 1;
+      const selection = TextSelection.create(view.state.doc, pos + delta);
+      const tr = view.state.tr.setSelection(selection);
+      focusElement(view.dom);
+      view.dispatch(tr);
     }
-    console.log(action);
-    this.state = nextState;
-    const { type } = action;
-    requestAnimationFrame(() => {
-      if (type === 'setProseMirrorProps') {
-        renderDOMAttributes(nextState);
-      }
-      renderCellEditor(nextState, this.dispatch);
-      renderCanvasDataGrid(nextState);
+    return;
+  }
+
+  if (key === 'ArrowLeft') {
+    const { pos } = selection;
+    const x = pos.x - 1;
+    if (x > -1) {
+      dispatch({
+        type: 'setSelection',
+        selection: CellSelection.create(x, pos.y),
+      });
+    }
+    return;
+  }
+
+  if (key === 'ArrowRight') {
+    const { pos } = selection;
+    const x = pos.x + 1;
+    if (x <= maxColIndex) {
+      dispatch({
+        type: 'setSelection',
+        selection: CellSelection.create(x, pos.y),
+      });
+    }
+    return;
+  }
+
+  if (key === 'ArrowDown') {
+    const { pos } = selection;
+    const y = pos.y + 1;
+    if (y <= maxRowIndex) {
+      dispatch({
+        type: 'setSelection',
+        selection: CellSelection.create(pos.x, y),
+      });
+    }
+    return;
+  }
+
+  if (key === 'ArrowUp') {
+    const { pos } = selection;
+    const y = pos.y - 1;
+    if (y > -1) {
+      dispatch({
+        type: 'setSelection',
+        selection: CellSelection.create(pos.x, y),
+      });
+    }
+    return;
+  }
+
+  if (key === 'Tab') {
+    const { pos } = selection;
+    const delta = e.shiftKey ? -1 : 1;
+    const x = clamp(0, pos.x + delta, 1000);
+    dispatch({
+      type: 'setSelection',
+      selection: CellSelection.create(x, pos.y),
     });
-  };
-
-  select() {}
-
-  unselect() {}
-
-  focus() {
-    this.state.dom.focus();
+    return;
   }
 
-  destroy() {
-    this.domEventsHandler.destroy();
+  if (key === 'Enter' || (A_Z_KEY.test(key) && !ctrlKey && !metaKey)) {
+    dispatch({
+      type: 'openCellEditor',
+    });
+    return;
   }
-
-  onMouseDown = (e: MouseEvent) => {
-    const { target } = e;
-    const { canvas, dom } = this.state;
-    if (target === canvas || target === dom) {
-      onMouseDown(e, this.state, this.dispatch);
-      this.focus();
-    }
-  };
-
-  onWheel = (e: WheelEvent) => {
-    onWheel(e, this.state, this.dispatch);
-  };
 }
 
 function onMouseDown(
@@ -120,19 +184,22 @@ function onMouseDown(
   state: CanvasDataGridState,
   dispatch: ReducerDispatch,
 ) {
-  e.preventDefault();
-  const { offsetX, offsetY } = e;
+  if (!shouldHandleEvent(e, state)) {
+    return;
+  }
   const { selection, isEditingCell } = state;
+  const { offsetX, offsetY } = e;
+  e.preventDefault();
   if (isEditingCell) {
     dispatch({
       type: 'closeCellEditor',
     });
     return;
   }
+
   const cell = findCellAtPoint(state, new Vector(offsetX, offsetY));
   if (cell) {
     const nextSelection = new CellSelection(cell);
-    console.log(nextSelection);
     if (nextSelection.equals(selection)) {
       dispatch({
         type: 'openCellEditor',
@@ -151,6 +218,10 @@ function onWheel(
   state: CanvasDataGridState,
   dispatch: ReducerDispatch,
 ) {
+  if (!shouldHandleEvent(e, state)) {
+    return;
+  }
+
   e.preventDefault();
 
   const { config, rows, cols, isEditingCell } = state;
@@ -214,4 +285,59 @@ function onWheel(
       canvasBox,
     });
   }
+}
+
+export default class CanvasDataGrid {
+  // Public.
+  state: CanvasDataGridState;
+
+  // Members.
+  domEventsHandler: DOMEventsHandler;
+
+  constructor(proseMirror: ProsemirrorProps) {
+    this.state = createCanvasDataGridState({ proseMirror });
+    this.domEventsHandler = createDOMEventsHandler(this.state.dom, this);
+    this._render();
+  }
+
+  dispatch = (action: ReducerAction) => {
+    const nextState = reducer(action, this.state);
+    if (!nextState) {
+      return;
+    }
+    this.state = nextState;
+    requestAnimationFrame(this._render);
+  };
+
+  focus() {
+    this.state.dom.focus();
+  }
+
+  destroy() {
+    this.domEventsHandler.destroy();
+  }
+
+  onMouseDown = (e: MouseEvent) => {
+    const { target } = e;
+    const { canvas, dom } = this.state;
+    if (target === canvas || target === dom) {
+      onMouseDown(e, this.state, this.dispatch);
+      this.focus();
+    }
+  };
+
+  onWheel = (e: WheelEvent) => {
+    onWheel(e, this.state, this.dispatch);
+  };
+
+  onKeyDown = (e: KeyboardEvent) => {
+    onKeyDown(e, this.state, this.dispatch);
+  };
+
+  _render = () => {
+    const { state } = this;
+    renderDOM(state);
+    renderCellEditor(state, this.dispatch);
+    renderCanvasDataGrid(state);
+  };
 }

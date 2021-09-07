@@ -56,22 +56,15 @@ class DataGridNodeView {
   }
 
   selectNode() {
-    console.log('selectNode');
     if (!this.selected) {
-      // this.reactRoot.setAttribute('tabindex', '0');
       this.selected = true;
-      this.datagrid.select();
+      this.datagrid.focus();
     }
   }
 
   deselectNode() {
-    console.log('deselectNode');
     if (this.selected) {
-      // this.reactRoot.removeAttribute('tabindex');
       this.selected = false;
-      this.datagrid.unselect();
-      // this.reactRoot.blur();
-      // this.props.view.focus();
     }
   }
 
@@ -80,7 +73,6 @@ class DataGridNodeView {
   };
 
   destroy() {
-    console.log('destroy');
     this.datagrid.destroy();
   }
 }

@@ -9,7 +9,7 @@
 
 .main:focus {
   outline: none;
-  outline: solid 1px rgb(80, 134, 236);
+  outline: solid 2px rgb(80, 134, 236);
 }
 
 .canvas {

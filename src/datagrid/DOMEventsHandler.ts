@@ -1,9 +1,11 @@
-type DOMEvent = WheelEvent;
+type WheeListener = (e: WheelEvent) => void;
+type MouseListener = (e: MouseEvent) => void;
+type KeyboardListener = (e: KeyboardEvent) => void;
 
 type EventRegistry = {
   dom: any;
   type: string;
-  listener: (e: DOMEvent) => void;
+  listener: WheeListener | MouseListener | KeyboardListener;
   capture: boolean;
 };
 
@@ -21,27 +23,27 @@ export default class DOMEventsHandler {
     });
   }
 
-  onClick(
-    dom: HTMLElement,
-    listener: (e: MouseEvent) => void,
-    capture?: boolean | null,
-  ) {
+  onClick(dom: HTMLElement, listener: MouseListener, capture?: boolean | null) {
     this._onMouseEvent('click', dom, listener, capture);
   }
 
   onMouseDown(
     dom: HTMLElement,
-    listener: (e: MouseEvent) => void,
+    listener: MouseListener,
     capture?: boolean | null,
   ) {
     this._onMouseEvent('mousedown', dom, listener, capture);
   }
 
-  onWheel(
+  onKeyDown(
     dom: HTMLElement,
-    listener: (e: WheelEvent) => void,
+    listener: KeyboardListener,
     capture?: boolean | null,
   ) {
+    this._onKeyboardEvent('keydown', dom, listener, capture);
+  }
+
+  onWheel(dom: HTMLElement, listener: WheeListener, capture?: boolean | null) {
     const type = 'wheel';
     const entry = { dom, type, listener, capture: !!capture };
     this._entries.push(entry);
@@ -51,7 +53,18 @@ export default class DOMEventsHandler {
   _onMouseEvent(
     type: 'click' | 'mousedown',
     dom: HTMLElement,
-    listener: (e: MouseEvent) => void,
+    listener: MouseListener,
+    capture?: boolean | null,
+  ) {
+    const entry = { dom, type, listener, capture: !!capture };
+    this._entries.push(entry);
+    dom.addEventListener(type, listener, !!capture);
+  }
+
+  _onKeyboardEvent(
+    type: 'keydown',
+    dom: HTMLElement,
+    listener: KeyboardListener,
     capture?: boolean | null,
   ) {
     const entry = { dom, type, listener, capture: !!capture };

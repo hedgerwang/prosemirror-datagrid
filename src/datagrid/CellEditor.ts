@@ -1,6 +1,6 @@
 import styles from './CellEditor.css';
 import Vector from './Vector';
-import { ReducerDispatch } from './reducer';
+import { ReducerDispatch } from './canvasDataGridReducer';
 import type { CanvasDataGridState } from './CanvasDataGridState';
 
 class State {
@@ -49,7 +49,6 @@ export default class CellEditor {
     };
     input.onkeydown = (e: KeyboardEvent) => {
       e.stopImmediatePropagation();
-      console.log(e.key);
       switch (e.key) {
         case 'Enter':
           dispatch({
