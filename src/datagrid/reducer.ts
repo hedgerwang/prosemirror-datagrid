@@ -18,7 +18,15 @@ export type ReducerAction =
   | {
       type: 'setCanvasBox';
       canvasBox: Box;
+    }
+  | {
+      type: 'openCellEditor';
+    }
+  | {
+      type: 'closeCellEditor';
     };
+
+export type ReducerDispatch = (action: ReducerAction) => void;
 
 // TODO: Avoid side-effect. It should not need to mutate the original state.
 export default function reducer(
@@ -40,6 +48,14 @@ export default function reducer(
     case 'setCanvasBox':
       const { canvasBox } = action;
       changes.canvasBox = canvasBox;
+      break;
+
+    case 'openCellEditor':
+      changes.isEditingCell = true;
+      break;
+
+    case 'closeCellEditor':
+      changes.isEditingCell = false;
       break;
 
     default:

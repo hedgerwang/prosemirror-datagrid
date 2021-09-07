@@ -1,0 +1,10 @@
+.dom {
+  left: 0;
+  position: absolute;
+  top: 0;
+  visibility: hidden;
+}
+
+.input {
+  padding: 6px;
+}

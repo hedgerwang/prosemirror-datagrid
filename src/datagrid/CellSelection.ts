@@ -1,15 +1,13 @@
 import Vector from './Vector';
 
 export default class CellSelection {
-  anchor: Vector;
-  focus: Vector;
+  pos: Vector;
 
-  constructor(anchor: Vector, focus?: Vector | null) {
-    this.anchor = anchor;
-    this.focus = focus || anchor;
+  constructor(anchor: Vector) {
+    this.pos = anchor;
   }
 
   equals(val: CellSelection): boolean {
-    return val.anchor.equals(this.anchor) && val.focus.equals(this.focus);
+    return val.pos.equals(this.pos);
   }
 }

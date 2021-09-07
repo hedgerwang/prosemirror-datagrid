@@ -4,7 +4,7 @@ import nullthrows from 'nullthrows';
 import SegmentList from './SegmentList';
 import CanvasDataGridConfig from './CanvasDataGridConfig';
 import CellSelection from './CellSelection';
-import CanvasDataGridState from './CanvasDataGridState';
+import type { CanvasDataGridState } from './CanvasDataGridState';
 
 type CellStyle = {
   bgColor?: string | null;
@@ -90,8 +90,8 @@ export default function renderCanvasDataGrid(state: CanvasDataGridState) {
     textColor,
   } = config;
 
-  const anchorCol = selection.anchor.x;
-  const anchorRow = selection.anchor.y;
+  const anchorCol = selection.pos.x;
+  const anchorRow = selection.pos.y;
   let anchorBox: Box | null = null;
 
   const ctx = new CanvasDataGridRenderingContext(
