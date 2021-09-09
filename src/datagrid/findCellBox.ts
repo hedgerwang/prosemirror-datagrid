@@ -1,6 +1,6 @@
 import Vector from './Vector';
 import Box from './Box';
-import type { CanvasDataGridState } from './CanvasDataGridState';
+import type { CanvasDataGridState } from './canvasDataGridState';
 
 export default function findCellBox(
   state: CanvasDataGridState,

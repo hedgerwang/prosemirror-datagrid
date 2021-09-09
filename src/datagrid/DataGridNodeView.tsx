@@ -3,7 +3,7 @@ import { NODE_NAME } from './DataGridNodeSpec';
 import { EditorView } from 'prosemirror-view';
 import type { Node as ProsemirrorNode } from 'prosemirror-model';
 import CanvasDataGrid from './CanvasDataGrid';
-import type { ProsemirrorProps } from './CanvasDataGridState';
+import type { ProsemirrorProps } from './canvasDataGridState';
 
 // Allows you to pass custom rendering and behavior logic for nodes and marks.
 // Should map node and mark names to constructor functions that produce a

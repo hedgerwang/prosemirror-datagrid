@@ -13,7 +13,7 @@ import CellSelection from './CellSelection';
 import type {
   CanvasDataGridState,
   ProsemirrorProps,
-} from './CanvasDataGridState';
+} from './canvasDataGridState';
 import type { ReducerAction, ReducerDispatch } from './canvasDataGridReducer';
 import reducer from './canvasDataGridReducer';
 import createCanvasDataGridState from './createCanvasDataGridState';

@@ -1,44 +1,18 @@
 import type {
   CanvasDataGridState,
-  ProsemirrorProps,
   CanvasDataGridStateChange,
-} from './CanvasDataGridState';
-import CellSelection from './CellSelection';
-import Box from './Box';
-import findCellAtPoint from './findCellAtPoint';
+} from './canvasDataGridState';
 import findCellBox from './findCellBox';
+import type {
+  CanvasDataGridAction,
+  CloseCellEditorAction,
+  OpenCellEditorAction,
+  SetCanvasBoxAction,
+  SetProseMirrorPropsAction,
+  SetSelectionAction,
+} from './canvasDataGridActions';
 
-type SetSelectionAction = {
-  type: 'setSelection';
-  selection: CellSelection;
-};
-
-type SetProseMirrorPropsAction = {
-  type: 'setProseMirrorProps';
-  props: ProsemirrorProps;
-};
-
-type SetCanvasBoxAction = {
-  type: 'setCanvasBox';
-  canvasBox: Box;
-};
-
-type OpenCellEditorAction = {
-  type: 'openCellEditor';
-};
-
-type CloseCellEditorAction = {
-  type: 'closeCellEditor';
-};
-
-export type ReducerAction =
-  | CloseCellEditorAction
-  | OpenCellEditorAction
-  | SetCanvasBoxAction
-  | SetProseMirrorPropsAction
-  | SetSelectionAction;
-
-export type ReducerDispatch = (action: ReducerAction) => void;
+export type ReducerDispatch = (action: CanvasDataGridAction) => void;
 
 function setSelection(
   action: SetSelectionAction,
@@ -61,7 +35,7 @@ function setSelection(
     let newCanvasBox = canvasBox;
     if (angle >= 45 && angle <= 135) {
       //     \   /
-      //      \ /____
+      //      \ /__
       //      / \
       //     /   \
       // right
@@ -75,7 +49,7 @@ function setSelection(
       newCanvasBox = newCanvasBox.moveBy(0, -cellBox.h);
     } else if (angle >= 225 && angle <= 315) {
       //     \   /
-      //  ___ \ /
+      //    __\ /
       //      / \
       //     /   \
       // left
@@ -136,7 +110,7 @@ function closeCellEditor(
 
 // TODO: Avoid side-effect. It should not need to mutate the original state.
 export default function canvasDataGridReducer(
-  action: ReducerAction,
+  action: CanvasDataGridAction,
   state: CanvasDataGridState,
 ): CanvasDataGridState | null {
   const changes: CanvasDataGridStateChange = {};

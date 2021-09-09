@@ -1,5 +1,5 @@
 import Vector from './Vector';
-import type { CanvasDataGridState } from './CanvasDataGridState';
+import type { CanvasDataGridState } from './canvasDataGridState';
 
 export default function findCellAtPoint(
   state: CanvasDataGridState,

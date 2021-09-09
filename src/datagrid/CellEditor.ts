@@ -1,7 +1,8 @@
 import styles from './CellEditor.css';
 import Vector from './Vector';
 import { ReducerDispatch } from './canvasDataGridReducer';
-import type { CanvasDataGridState } from './CanvasDataGridState';
+import type { CanvasDataGridState } from './canvasDataGridState';
+import { closeCellEditor } from './canvasDataGridActions';
 
 class State {
   focusTimer = 0;
@@ -11,7 +12,7 @@ class State {
 
 export default class CellEditor {
   dom: HTMLElement;
-  input: HTMLElement;
+  input: HTMLInputElement;
   state: State;
 
   constructor() {
@@ -49,23 +50,18 @@ export default class CellEditor {
     };
     input.onkeydown = (e: KeyboardEvent) => {
       e.stopImmediatePropagation();
+      const content = input.value;
       switch (e.key) {
         case 'Enter':
-          dispatch({
-            type: 'closeCellEditor',
-          });
+          dispatch(closeCellEditor(content));
           break;
         case 'Escape':
           e.preventDefault();
-          dispatch({
-            type: 'closeCellEditor',
-          });
+          dispatch(closeCellEditor(content));
           break;
         case 'Tab':
           e.preventDefault();
-          dispatch({
-            type: 'closeCellEditor',
-          });
+          dispatch(closeCellEditor(content));
           break;
       }
     };

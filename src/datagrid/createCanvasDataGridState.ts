@@ -9,7 +9,7 @@ import CellSelection from './CellSelection';
 import Vector from './Vector';
 import { ReducerDispatch } from './canvasDataGridReducer';
 import CellEditor from './CellEditor';
-import type { CanvasDataGridState } from './CanvasDataGridState';
+import type { CanvasDataGridState } from './canvasDataGridState';
 
 const DEFAULT_ROW_HEIGHT = 32;
 const DEFAULT_COL_WIDTH = 120;

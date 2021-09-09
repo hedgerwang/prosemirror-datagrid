@@ -4,7 +4,7 @@ import nullthrows from 'nullthrows';
 import SegmentList from './SegmentList';
 import CanvasDataGridConfig from './CanvasDataGridConfig';
 import CellSelection from './CellSelection';
-import type { CanvasDataGridState } from './CanvasDataGridState';
+import type { CanvasDataGridState } from './canvasDataGridState';
 
 type CellStyle = {
   bgColor?: string | null;
