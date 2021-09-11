@@ -22,7 +22,7 @@ function createEditorState() {
 
   const plugins = [
     history(),
-    keymap({ 'Mod-z': undo, 'Mod-y': redo }),
+    keymap({ 'Mod-z': undo, 'Mod-Shift-z': redo }),
     keymap(baseKeymap),
   ];
 
@@ -36,10 +36,13 @@ function createEditorState() {
   tr = tr.insertText('some text here');
   tr = insertDataGrid(state.schema, tr);
   tr = tr.insertText('some text here some text here some text here');
-  // tr = insertDataGrid(state.schema, tr);
   tr = tr.insertText('some text here');
 
-  return state.apply(tr);
+  return EditorState.create({
+    doc: schema.nodeFromJSON(state.apply(tr).doc.toJSON()),
+    schema: schema,
+    plugins,
+  });
 }
 
 function createEditorView(el: HTMLElement) {
@@ -47,8 +50,8 @@ function createEditorView(el: HTMLElement) {
   const editorView = new EditorView(el, {
     state: editorState,
     nodeViews: { ...createDataGridNodeViewsRenderingMap() },
-    dispatchTransaction(transaction: Transaction) {
-      const newState = editorView.state.apply(transaction);
+    dispatchTransaction(tr: Transaction) {
+      const newState = editorView.state.apply(tr);
       editorView.updateState(newState);
     },
   });

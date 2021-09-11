@@ -14,10 +14,16 @@ import type {
   CanvasDataGridState,
   ProsemirrorProps,
 } from './canvasDataGridState';
-import type { ReducerAction, ReducerDispatch } from './canvasDataGridReducer';
+import type { ReducerDispatch } from './canvasDataGridReducer';
 import reducer from './canvasDataGridReducer';
+import type { CanvasDataGridAction } from './canvasDataGridActions';
 import createCanvasDataGridState from './createCanvasDataGridState';
 import { TextSelection } from 'prosemirror-state';
+import {
+  setActive,
+  openCellEditor,
+  setSelection,
+} from './canvasDataGridActions';
 
 const A_Z_KEY = /^[a-zA-Z0-9]$/;
 
@@ -34,12 +40,21 @@ function focusElement(el: Element, delay?: number) {
 }
 
 function renderDOM(state: CanvasDataGridState) {
-  const { proseMirror, dom } = state;
+  const { proseMirror, dom, active } = state;
   const { node } = proseMirror;
   const el: any = dom;
+
+  console.log('>>>rendom', active);
+
+  if (active !== el.__active) {
+    el.__active = active;
+    dom.setAttribute('data-active', String(active));
+  }
+
   if (el.__proseMirrorNode === node) {
     return;
   }
+
   el.__proseMirrorNode = node;
   const domAttrs = toDOMAttributes(node);
   Object.keys(domAttrs).forEach((name) => {
@@ -49,6 +64,7 @@ function renderDOM(state: CanvasDataGridState) {
       dom.setAttribute(name, domAttrs[name]);
     }
   });
+
   dom.classList.add(styles.main);
 }
 
@@ -76,6 +92,8 @@ function createDOMEventsHandler(
   domEventsHandler.onWheel(dom, datagrid.onWheel, true);
   domEventsHandler.onMouseDown(dom, datagrid.onMouseDown, true);
   domEventsHandler.onKeyDown(dom, datagrid.onKeyDown, true);
+  domEventsHandler.onFocusIn(dom, datagrid.onFocusChange, true);
+  domEventsHandler.onFocusOut(dom, datagrid.onFocusChange, true);
   return domEventsHandler;
 }
 
@@ -85,12 +103,31 @@ function shouldHandleEvent(e: Event, state: CanvasDataGridState) {
   return !isEditingCell || dom === target || canvas === target;
 }
 
+function onFocusChange(
+  e: Event,
+  state: CanvasDataGridState,
+  dispatch: ReducerDispatch,
+) {
+  const { dom } = state;
+  const { activeElement } = document;
+  const active = activeElement
+    ? activeElement === dom || dom.contains(activeElement)
+    : false;
+  console.log('>>>onFocusChange', e.type, active, activeElement);
+  dispatch(setActive(active));
+}
+
 function onKeyDown(
   e: KeyboardEvent,
   state: CanvasDataGridState,
   dispatch: ReducerDispatch,
 ) {
   if (!shouldHandleEvent(e, state)) {
+    return;
+  }
+
+  if (e.ctrlKey || e.metaKey) {
+    // reload / redu / undo...etc.
     return;
   }
 
@@ -116,10 +153,7 @@ function onKeyDown(
     const { pos } = selection;
     const x = pos.x - 1;
     if (x > -1) {
-      dispatch({
-        type: 'setSelection',
-        selection: CellSelection.create(x, pos.y),
-      });
+      dispatch(setSelection(CellSelection.create(x, pos.y)));
     }
     return;
   }
@@ -128,10 +162,7 @@ function onKeyDown(
     const { pos } = selection;
     const x = pos.x + 1;
     if (x <= maxColIndex) {
-      dispatch({
-        type: 'setSelection',
-        selection: CellSelection.create(x, pos.y),
-      });
+      dispatch(setSelection(CellSelection.create(x, pos.y)));
     }
     return;
   }
@@ -140,10 +171,7 @@ function onKeyDown(
     const { pos } = selection;
     const y = pos.y + 1;
     if (y <= maxRowIndex) {
-      dispatch({
-        type: 'setSelection',
-        selection: CellSelection.create(pos.x, y),
-      });
+      dispatch(setSelection(CellSelection.create(pos.x, y)));
     }
     return;
   }
@@ -152,10 +180,7 @@ function onKeyDown(
     const { pos } = selection;
     const y = pos.y - 1;
     if (y > -1) {
-      dispatch({
-        type: 'setSelection',
-        selection: CellSelection.create(pos.x, y),
-      });
+      dispatch(setSelection(CellSelection.create(pos.x, y)));
     }
     return;
   }
@@ -164,17 +189,12 @@ function onKeyDown(
     const { pos } = selection;
     const delta = e.shiftKey ? -1 : 1;
     const x = clamp(0, pos.x + delta, 1000);
-    dispatch({
-      type: 'setSelection',
-      selection: CellSelection.create(x, pos.y),
-    });
+    dispatch(setSelection(CellSelection.create(x, pos.y)));
     return;
   }
 
   if (key === 'Enter' || (A_Z_KEY.test(key) && !ctrlKey && !metaKey)) {
-    dispatch({
-      type: 'openCellEditor',
-    });
+    dispatch(openCellEditor());
     return;
   }
 }
@@ -187,28 +207,35 @@ function onMouseDown(
   if (!shouldHandleEvent(e, state)) {
     return;
   }
+
   const { selection, isEditingCell } = state;
   const { offsetX, offsetY } = e;
   e.preventDefault();
+
   if (isEditingCell) {
-    dispatch({
-      type: 'closeCellEditor',
-    });
     return;
   }
 
   const cell = findCellAtPoint(state, new Vector(offsetX, offsetY));
   if (cell) {
-    const nextSelection = new CellSelection(cell);
-    if (nextSelection.equals(selection)) {
-      dispatch({
-        type: 'openCellEditor',
-      });
+    const { x, y } = cell;
+    let nextSelection;
+    if (x === 0 && y === 0) {
+      // top-left corner.
+    } else if (y > 0 && x === 0) {
+      // row selection.
+    } else if (x > 0 && y === 0) {
+      //
     } else {
-      dispatch({
-        type: 'setSelection',
-        selection: nextSelection,
-      });
+      nextSelection = new CellSelection(cell);
+    }
+    if (!nextSelection) {
+      return;
+    }
+    if (nextSelection.equals(selection)) {
+      dispatch(openCellEditor());
+    } else {
+      dispatch(setSelection(nextSelection));
     }
   }
 }
@@ -300,13 +327,20 @@ export default class CanvasDataGrid {
     this._render();
   }
 
-  dispatch = (action: ReducerAction) => {
+  dispatch = (action: CanvasDataGridAction) => {
     const nextState = reducer(action, this.state);
+    console.log('>>>', action, nextState);
     if (!nextState) {
       return;
     }
+
+    const { tr, proseMirror } = nextState;
+    if (tr) {
+      nextState.tr = null;
+    }
     this.state = nextState;
     requestAnimationFrame(this._render);
+    tr && proseMirror.view.dispatch(tr);
   };
 
   focus() {
@@ -332,6 +366,10 @@ export default class CanvasDataGrid {
 
   onKeyDown = (e: KeyboardEvent) => {
     onKeyDown(e, this.state, this.dispatch);
+  };
+
+  onFocusChange = (e: Event) => {
+    onFocusChange(e, this.state, this.dispatch);
   };
 
   _render = () => {

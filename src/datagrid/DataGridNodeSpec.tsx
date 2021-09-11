@@ -9,15 +9,16 @@ import type {
 } from 'prosemirror-model';
 
 export const NODE_NAME = 'datagrid';
-export const ROW_HEIGHT_DEFAULT = 25;
 
 type NodeAttributes = {
-  rowHeight: number;
+  entries: {
+    [key: string]: string;
+  };
 };
 
 export enum DOMAttrs {
   data_grid = 'data-datagrid',
-  row_height = 'data-datagrid-row-height',
+  data_grid_entries = 'data-datagrid-entries',
 }
 
 export function parseDOMAttributes(obj: string | Node): NodeAttributes {
@@ -25,17 +26,8 @@ export function parseDOMAttributes(obj: string | Node): NodeAttributes {
     throw new Error('Expect DOM Element');
   }
   const el: HTMLElement = obj;
-  const rowHeight = el.getAttribute(DOMAttrs.row_height);
-  return createNodeAttributes({
-    rowHeight: (rowHeight && Number(rowHeight)) || ROW_HEIGHT_DEFAULT,
-  });
-}
-
-export function createNodeAttributes(options: {
-  rowHeight?: number;
-}): NodeAttributes {
   return {
-    rowHeight: options.rowHeight || ROW_HEIGHT_DEFAULT,
+    entries: {},
   };
 }
 
@@ -45,18 +37,15 @@ export function toDOMAttributes(node: ProsemirrorNode): {
   return {
     ['className']: 'datagrid',
     [DOMAttrs.data_grid]: 'true',
-    [DOMAttrs.row_height]: String(node.attrs.rowHeight),
+    [DOMAttrs.data_grid_entries]: '{}',
   };
 }
 
 // See https://prosemirror.net/docs/ref/#model.NodeSpec.
-export function createNodesSpec(options: {
-  rowHeight?: number;
-}): OrderedMap<NodeSpec> {
-  const rowHeight = options.rowHeight || ROW_HEIGHT_DEFAULT;
+export function createNodesSpec(options: {}): OrderedMap<NodeSpec> {
   const nodeSpec = {
     attrs: {
-      rowHeight: { default: rowHeight },
+      entries: { default: {} },
     },
     atom: true,
     defining: true,

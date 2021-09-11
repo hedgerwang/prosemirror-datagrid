@@ -3,6 +3,7 @@ import Vector from './Vector';
 import { ReducerDispatch } from './canvasDataGridReducer';
 import type { CanvasDataGridState } from './canvasDataGridState';
 import { closeCellEditor } from './canvasDataGridActions';
+import getCellEntryContent from './getCellEntryContent';
 
 class State {
   focusTimer = 0;
@@ -43,25 +44,26 @@ export default class CellEditor {
     this.state.visible = true;
     dom.style.transform = `translate3d(${x}px,${y}px,0)`;
     dom.style.visibility = 'visible';
-    input.onblur = () => {
-      dispatch({
-        type: 'closeCellEditor',
-      });
+
+    const cell = state.selection.pos;
+    const submit = () => {
+      const content = input.value;
+      dispatch(closeCellEditor(content));
     };
+
+    input.value = getCellEntryContent(state, cell.x, cell.y);
+    input.onmousedown = (e) => {
+      e.preventDefault();
+    };
+    input.onblur = submit;
     input.onkeydown = (e: KeyboardEvent) => {
       e.stopImmediatePropagation();
-      const content = input.value;
       switch (e.key) {
         case 'Enter':
-          dispatch(closeCellEditor(content));
-          break;
         case 'Escape':
-          e.preventDefault();
-          dispatch(closeCellEditor(content));
-          break;
         case 'Tab':
           e.preventDefault();
-          dispatch(closeCellEditor(content));
+          submit();
           break;
       }
     };
@@ -93,7 +95,7 @@ export default class CellEditor {
       state.focusTimer = setTimeout(() => {
         const pe = dom.parentElement;
         pe && pe.focus();
-      }, 150);
+      }, 0);
     }
   }
 }

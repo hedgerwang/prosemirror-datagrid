@@ -7,10 +7,12 @@ import type {
   CanvasDataGridAction,
   CloseCellEditorAction,
   OpenCellEditorAction,
+  SetActiveAction,
   SetCanvasBoxAction,
   SetProseMirrorPropsAction,
   SetSelectionAction,
 } from './canvasDataGridActions';
+import setCellEntryContent from './setCellEntryContent';
 
 export type ReducerDispatch = (action: CanvasDataGridAction) => void;
 
@@ -106,6 +108,22 @@ function closeCellEditor(
   changes: CanvasDataGridStateChange,
 ) {
   changes.isEditingCell = false;
+
+  const editorState = state.proseMirror.view.state;
+  const { tr, schema } = editorState;
+  const { content } = action;
+  const { getPos } = state.proseMirror;
+  const cell = state.selection.pos;
+  const pos = typeof getPos === 'function' ? getPos() : 0;
+  changes.tr = setCellEntryContent(schema, tr, pos, cell.x, cell.y, content);
+}
+
+function setActive(
+  action: SetActiveAction,
+  state: CanvasDataGridState,
+  changes: CanvasDataGridStateChange,
+) {
+  changes.active = action.active;
 }
 
 // TODO: Avoid side-effect. It should not need to mutate the original state.
@@ -117,6 +135,10 @@ export default function canvasDataGridReducer(
   switch (action.type) {
     case 'setProseMirrorProps':
       setProseMirrorProps(action, state, changes);
+      break;
+
+    case 'setActive':
+      setActive(action, state, changes);
       break;
 
     case 'setSelection':

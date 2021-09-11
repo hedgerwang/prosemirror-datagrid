@@ -35,6 +35,26 @@ export default class DOMEventsHandler {
     this._onMouseEvent('mousedown', dom, listener, capture);
   }
 
+  onFocusIn(
+    dom: HTMLElement,
+    listener: EventListener,
+    capture?: boolean | null,
+  ) {
+    this._onEvent('focusin', dom, listener, capture);
+  }
+
+  onFocusOut(
+    dom: HTMLElement,
+    listener: EventListener,
+    capture?: boolean | null,
+  ) {
+    this._onEvent('focusout', dom, listener, capture);
+  }
+
+  onBlur(dom: HTMLElement, listener: EventListener, capture?: boolean | null) {
+    this._onEvent('focusout', dom, listener, capture);
+  }
+
   onKeyDown(
     dom: HTMLElement,
     listener: KeyboardListener,
@@ -45,6 +65,17 @@ export default class DOMEventsHandler {
 
   onWheel(dom: HTMLElement, listener: WheeListener, capture?: boolean | null) {
     const type = 'wheel';
+    const entry = { dom, type, listener, capture: !!capture };
+    this._entries.push(entry);
+    dom.addEventListener(type, listener, !!capture);
+  }
+
+  _onEvent(
+    type: string,
+    dom: HTMLElement,
+    listener: EventListener,
+    capture?: boolean | null,
+  ) {
     const entry = { dom, type, listener, capture: !!capture };
     this._entries.push(entry);
     dom.addEventListener(type, listener, !!capture);

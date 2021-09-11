@@ -1,10 +1,9 @@
 import CanvasDataGridRenderingContext from './CanvasDataGridRenderingContext';
 import Box from './Box';
 import nullthrows from 'nullthrows';
-import SegmentList from './SegmentList';
 import CanvasDataGridConfig from './CanvasDataGridConfig';
-import CellSelection from './CellSelection';
 import type { CanvasDataGridState } from './canvasDataGridState';
+import getCellEntryContent from './getCellEntryContent';
 
 type CellStyle = {
   bgColor?: string | null;
@@ -77,7 +76,6 @@ function renderFixedShadow(
 export default function renderCanvasDataGrid(state: CanvasDataGridState) {
   const { canvas, canvasBox, config, selection, rows, cols, fps } = state;
   const {
-    cellBGColor,
     cellBorderColor,
     fixedColBGColor,
     fixedColsCount,
@@ -116,7 +114,6 @@ export default function renderCanvasDataGrid(state: CanvasDataGridState) {
   rowsVisible.forEach((row) => {
     const hh = row.to - row.from;
     const fromY = row.from - y;
-    const toY = fromY + hh;
     colsVisible.forEach((col) => {
       const rr = row.index;
       const cc = col.index;
@@ -135,8 +132,7 @@ export default function renderCanvasDataGrid(state: CanvasDataGridState) {
           bgColor: selectionBGColor,
         };
       }
-
-      const text = `${selected} ${rr}, ${cc}`;
+      const text = getCellEntryContent(state, cc, rr);
       renderCell(ctx, config, new Box(fromX, fromY, ww, hh), text, cellStyle);
     });
   });
@@ -177,7 +173,7 @@ export default function renderCanvasDataGrid(state: CanvasDataGridState) {
       const fromY = row.from - y;
       const toX = col.to;
       const ww = toX - fromX;
-      const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
+      const text = getCellEntryContent(state, cc, rr);
       const cellBox = new Box(fromX, fromY, ww, hh);
       let cellStyle = fixedColStyle;
       if (selected) {
@@ -218,7 +214,7 @@ export default function renderCanvasDataGrid(state: CanvasDataGridState) {
       const fromX = col.from - x;
       const toX = col.to - x;
       const ww = toX - fromX;
-      const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
+      const text = getCellEntryContent(state, cc, rr);
       let cellStyle = fixedRowCellStyle;
       const selected = anchorCol === cc && anchorRow === rr;
       const cellBox = new Box(fromX, fromY, ww, hh);
@@ -246,7 +242,7 @@ export default function renderCanvasDataGrid(state: CanvasDataGridState) {
       const toY = row.to;
       const ww = toX - fromX;
       const hh = toY - fromY;
-      const text = cc === 0 ? `${rr}` : `${rr}, ${cc}`;
+      const text = getCellEntryContent(state, cc, rr);
       renderCell(
         ctx,
         config,

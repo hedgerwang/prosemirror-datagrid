@@ -2,13 +2,14 @@ import { Transaction } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
 import { NODE_NAME } from './DatagridNodeSpec';
 import Vector from './Vector';
-import getCellAttrKey from './getCellAttrKey';
+import getCellEntryKey from './getCellEntryKey';
 
-export default function setCellContent(
+export default function setCellEntryContent(
   schema: Schema,
   tr: Transaction,
   pos: number,
-  cell: Vector,
+  colIndex: number,
+  rowIndex: number,
   content: string,
 ): Transaction {
   const nodeType = schema.nodes[NODE_NAME];
@@ -25,10 +26,13 @@ export default function setCellContent(
     );
   }
   const { marks, attrs } = node;
-  const key = getCellAttrKey(cell);
+  const key = getCellEntryKey(colIndex, rowIndex);
   const newAttrs = {
     ...attrs,
-    [key]: content,
+    entries: {
+      ...attrs.entries,
+      [key]: content,
+    },
   };
   tr = tr.setNodeMarkup(pos, nodeType, newAttrs, marks);
   return tr;

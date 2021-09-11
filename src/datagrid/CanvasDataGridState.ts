@@ -6,15 +6,21 @@ import { Decoration } from 'prosemirror-view';
 import { EditorView } from 'prosemirror-view';
 import CellSelection from './CellSelection';
 import CellEditor from './CellEditor';
+import { Transaction } from 'prosemirror-state';
 
 export type ProsemirrorProps = {
   node: ProsemirrorNode;
   view: EditorView;
+  // . For nodes, the third argument getPos is a function that can be called to
+  // get the node's current position, which can be useful when creating
+  // transactions to update it. For marks, the third argument is a boolean
+  // that indicates whether the mark's content is inline.
   getPos: (() => number) | boolean;
   decorations: Decoration[];
 };
 
 export type CanvasDataGridState = {
+  active: boolean;
   canvas: HTMLCanvasElement;
   canvasBox: Box;
   cellEditor: CellEditor;
@@ -29,11 +35,14 @@ export type CanvasDataGridState = {
   proseMirror: ProsemirrorProps;
   rows: SegmentList;
   selection: CellSelection;
+  tr: Transaction | null;
 };
 
 export type CanvasDataGridStateChange = {
+  active?: boolean;
   canvasBox?: Box;
   isEditingCell?: boolean;
   proseMirror?: ProsemirrorProps;
   selection?: CellSelection;
+  tr?: Transaction;
 };

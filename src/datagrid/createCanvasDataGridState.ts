@@ -24,7 +24,6 @@ export type ProsemirrorProps = {
 function createDOM(): HTMLElement {
   const dom = document.createElement('div');
   dom.tabIndex = 0;
-  dom.className = styles.main;
   return dom;
 }
 
@@ -57,6 +56,7 @@ export default function createCanvasDataGridState(props: {
   cols.setSize(0, config.indexColumnWidth);
   rows.setSize(0, config.indexRowHeight);
   return {
+    active: false,
     canvas,
     canvasBox,
     cellEditor,
@@ -71,5 +71,6 @@ export default function createCanvasDataGridState(props: {
     proseMirror,
     rows,
     selection,
+    tr: null,
   };
 }
