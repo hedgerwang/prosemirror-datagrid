@@ -65,7 +65,7 @@ export default function createCanvasDataGridState(props: {
     fps: 60,
     isEditingCell: false,
     lastRenderedAt: 0,
-    maxColIndex: 1000,
+    maxColIndex: 26,
     maxRowIndex: 1000,
     proseMirror,
     rows,
