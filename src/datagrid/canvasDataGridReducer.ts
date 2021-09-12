@@ -41,7 +41,9 @@ function setSelection(
       //      / \
       //     /   \
       // right
-      newCanvasBox = newCanvasBox.moveBy(cellBox.w, 0);
+      do {
+        newCanvasBox = newCanvasBox.moveBy(cellBox.w, 0);
+      } while (cellBox.isOutsideOf(newCanvasBox));
     } else if (angle >= 315 || angle <= 45) {
       //     \ | /
       //      \|/
@@ -55,7 +57,9 @@ function setSelection(
       //      / \
       //     /   \
       // left
-      newCanvasBox = newCanvasBox.moveBy(-cellBox.w, 0);
+      do {
+        newCanvasBox = newCanvasBox.moveBy(-cellBox.w, 0);
+      } while (cellBox.isOutsideOf(newCanvasBox));
     } else if (angle >= 135 && angle <= 225) {
       //     \   /
       //      \ /
@@ -67,7 +71,6 @@ function setSelection(
 
     const { x, y } = newCanvasBox;
     newCanvasBox = newCanvasBox.moveBy(x < 0 ? -x : 0, y < 0 ? -y : 0);
-
     if (!newCanvasBox.equals(canvasBox)) {
       changes.canvasBox = newCanvasBox;
     }

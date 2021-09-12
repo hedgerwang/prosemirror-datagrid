@@ -55,9 +55,20 @@ export default class CellEditor {
     input.onmousedown = (e) => {
       e.preventDefault();
     };
-    input.onblur = submit;
-    input.onkeydown = (e: KeyboardEvent) => {
+    input.onpaste = (e) => {
+      // block prose-mirror.
       e.stopImmediatePropagation();
+    };
+    input.oncut = (e) => {
+      // block prose-mirror.
+      e.stopImmediatePropagation();
+    };
+    input.onblur = submit;
+
+    input.onkeydown = (e: KeyboardEvent) => {
+      // block prose-mirror.
+      e.stopImmediatePropagation();
+
       switch (e.key) {
         case 'Enter':
         case 'Escape':
@@ -90,7 +101,8 @@ export default class CellEditor {
       dom.style.visibility = 'hidden';
       clearTimeout(focusTimer);
       input.onblur = null;
-      input.onkeypress = null;
+      input.onpaste = null;
+      input.oncopy = null;
       input.onkeydown = null;
       state.focusTimer = setTimeout(() => {
         const pe = dom.parentElement;

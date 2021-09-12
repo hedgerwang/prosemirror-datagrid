@@ -50,9 +50,8 @@ export default function createCanvasDataGridState(props: {
   const canvas = createCanvas(dom);
   const rows = new SegmentList(DEFAULT_ROW_HEIGHT);
   const cols = new SegmentList(DEFAULT_COL_WIDTH);
-  const selection = new CellSelection(new Vector(0, 0));
+  const selection = new CellSelection(new Vector(1, 1));
   const cellEditor = createCellEditor(dom);
-
   cols.setSize(0, config.indexColumnWidth);
   rows.setSize(0, config.indexRowHeight);
   return {

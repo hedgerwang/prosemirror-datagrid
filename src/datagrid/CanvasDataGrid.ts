@@ -44,8 +44,6 @@ function renderDOM(state: CanvasDataGridState) {
   const { node } = proseMirror;
   const el: any = dom;
 
-  console.log('>>>rendom', active);
-
   if (active !== el.__active) {
     el.__active = active;
     dom.setAttribute('data-active', String(active));
@@ -113,7 +111,6 @@ function onFocusChange(
   const active = activeElement
     ? activeElement === dom || dom.contains(activeElement)
     : false;
-  console.log('>>>onFocusChange', e.type, active, activeElement);
   dispatch(setActive(active));
 }
 
@@ -152,7 +149,7 @@ function onKeyDown(
   if (key === 'ArrowLeft') {
     const { pos } = selection;
     const x = pos.x - 1;
-    if (x > -1) {
+    if (x > 0) {
       dispatch(setSelection(CellSelection.create(x, pos.y)));
     }
     return;
@@ -179,7 +176,7 @@ function onKeyDown(
   if (key === 'ArrowUp') {
     const { pos } = selection;
     const y = pos.y - 1;
-    if (y > -1) {
+    if (y > 0) {
       dispatch(setSelection(CellSelection.create(pos.x, y)));
     }
     return;
@@ -188,8 +185,21 @@ function onKeyDown(
   if (key === 'Tab') {
     const { pos } = selection;
     const delta = e.shiftKey ? -1 : 1;
-    const x = clamp(0, pos.x + delta, 1000);
-    dispatch(setSelection(CellSelection.create(x, pos.y)));
+    let x = pos.x + delta;
+    let y = pos.y;
+    if (x > maxColIndex) {
+      x = 1;
+      y += 1;
+    }
+    if (x < 1) {
+      x = maxColIndex;
+      y -= 1;
+    }
+
+    if (y >= 1 && y <= maxRowIndex) {
+      dispatch(setSelection(CellSelection.create(x, y)));
+    }
+
     return;
   }
 
@@ -329,7 +339,6 @@ export default class CanvasDataGrid {
 
   dispatch = (action: CanvasDataGridAction) => {
     const nextState = reducer(action, this.state);
-    console.log('>>>', action, nextState);
     if (!nextState) {
       return;
     }

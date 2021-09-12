@@ -7,8 +7,8 @@ export default class CellSelection {
     return new CellSelection(new Vector(colIndex, rowIndex));
   }
 
-  constructor(anchor: Vector) {
-    this.pos = anchor;
+  constructor(cell: Vector) {
+    this.pos = cell;
   }
 
   equals(val: CellSelection): boolean {
