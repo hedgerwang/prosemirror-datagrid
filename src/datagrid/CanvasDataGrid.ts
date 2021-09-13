@@ -23,6 +23,7 @@ import {
   setActive,
   openCellEditor,
   setSelection,
+  setCanvasBox,
 } from './canvasDataGridActions';
 
 const A_Z_KEY = /^[a-zA-Z0-9]$/;
@@ -317,10 +318,7 @@ function onWheel(
   }
 
   if (!state.canvasBox.equals(canvasBox)) {
-    dispatch({
-      type: 'setCanvasBox',
-      canvasBox,
-    });
+    dispatch(setCanvasBox(canvasBox));
   }
 }
 

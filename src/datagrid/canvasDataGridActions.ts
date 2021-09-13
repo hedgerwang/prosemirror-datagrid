@@ -48,7 +48,7 @@ export function setProseMirrorProps(
   };
 }
 
-export function setCanvasBoxAction(canvasBox: Box): SetCanvasBoxAction {
+export function setCanvasBox(canvasBox: Box): SetCanvasBoxAction {
   return {
     type: 'setCanvasBox',
     canvasBox,

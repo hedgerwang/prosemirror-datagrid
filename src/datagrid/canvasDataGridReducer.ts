@@ -13,8 +13,21 @@ import type {
   SetSelectionAction,
 } from './canvasDataGridActions';
 import setCellEntryContent from './setCellEntryContent';
+import Box from './Box';
 
 export type ReducerDispatch = (action: CanvasDataGridAction) => void;
+
+function getFixedRowsHeight(state: CanvasDataGridState): number {
+  const { config, rows } = state;
+  const row = rows.peekAt(config.fixedRowsCount - 1);
+  return row.to;
+}
+
+function getFixedColsWidth(state: CanvasDataGridState): number {
+  const { config, cols } = state;
+  const row = cols.peekAt(config.fixedColsCount - 1);
+  return row.to;
+}
 
 function setSelection(
   action: SetSelectionAction,
@@ -24,56 +37,40 @@ function setSelection(
   const { canvasBox } = state;
   const { selection } = action;
   const cellBox = findCellBox(state, selection.pos);
-  if (
-    (cellBox && cellBox.isOutsideOf(canvasBox)) ||
-    (cellBox && cellBox.isCorssBoundaryOf(canvasBox)) ||
-    (cellBox && cellBox.isInsideAtBoundaryOf(canvasBox))
-  ) {
-    // The selected cell should be scrolled into canvas.
-    const cellCenter = cellBox.getCenter();
-    const canvasCenter = canvasBox.getCenter();
-    const angle = cellCenter.getAngleFrom(canvasCenter);
+  let newCanvasBox = canvasBox;
 
-    let newCanvasBox = canvasBox;
-    if (angle >= 45 && angle <= 135) {
-      //     \   /
-      //      \ /__
-      //      / \
-      //     /   \
-      // right
-      do {
-        newCanvasBox = newCanvasBox.moveBy(cellBox.w, 0);
-      } while (cellBox.isOutsideOf(newCanvasBox));
-    } else if (angle >= 315 || angle <= 45) {
-      //     \ | /
-      //      \|/
-      //      / \
-      //     /   \
-      // up
-      newCanvasBox = newCanvasBox.moveBy(0, -cellBox.h);
-    } else if (angle >= 225 && angle <= 315) {
-      //     \   /
-      //    __\ /
-      //      / \
-      //     /   \
-      // left
-      do {
-        newCanvasBox = newCanvasBox.moveBy(-cellBox.w, 0);
-      } while (cellBox.isOutsideOf(newCanvasBox));
-    } else if (angle >= 135 && angle <= 225) {
-      //     \   /
-      //      \ /
-      //      /|\
-      //     / | \
-      // down
-      newCanvasBox = newCanvasBox.moveBy(0, cellBox.h);
+  if (cellBox) {
+    const cw = getFixedColsWidth(state);
+    const rh = getFixedRowsHeight(state);
+    const viewpotBox = new Box(
+      newCanvasBox.x + cw,
+      newCanvasBox.y + rh,
+      newCanvasBox.w - cw,
+      newCanvasBox.h - rh,
+    );
+    let dx = 0;
+    let dy = 0;
+    if (cellBox.x < viewpotBox.x) {
+      dx = -(viewpotBox.x - cellBox.x);
     }
 
-    const { x, y } = newCanvasBox;
-    newCanvasBox = newCanvasBox.moveBy(x < 0 ? -x : 0, y < 0 ? -y : 0);
-    if (!newCanvasBox.equals(canvasBox)) {
-      changes.canvasBox = newCanvasBox;
+    if (cellBox.x + cellBox.w > viewpotBox.x + viewpotBox.w) {
+      dx = cellBox.x + cellBox.w - viewpotBox.x - viewpotBox.w;
     }
+    if (cellBox.y <= viewpotBox.y) {
+      dy = -(viewpotBox.y - cellBox.y, cellBox.h);
+    }
+    if (cellBox.y + cellBox.h >= viewpotBox.y + viewpotBox.h) {
+      dy = cellBox.y + cellBox.h - viewpotBox.y - viewpotBox.h;
+    }
+    newCanvasBox = newCanvasBox.moveBy(dx, dy);
+  }
+
+  const { x, y } = newCanvasBox;
+  newCanvasBox = newCanvasBox.moveBy(x < 0 ? -x : 0, y < 0 ? -y : 0);
+
+  if (!newCanvasBox.equals(canvasBox)) {
+    changes.canvasBox = newCanvasBox;
   }
 
   changes.selection = selection;

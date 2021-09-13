@@ -80,6 +80,13 @@ export default class Box {
     return new Box(this.x + x, this.y + y, this.w, this.h);
   }
 
+  resizeBy(w: number, h: number): Box {
+    if (w === 0 && h === 0) {
+      return this;
+    }
+    return new Box(this.x, this.y, this.w + w, this.h + h);
+  }
+
   toString() {
     return `Box(x:${this.x}, y:${this.y}, w:${this.w}, h:${this.h})`;
   }
