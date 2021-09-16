@@ -6,12 +6,18 @@ const commonConfig = require('./common');
 module.exports = merge(commonConfig, {
   mode: 'production',
   entry: {
-    example: './exmple.tsx', // the entry point of example app
+    // entry point for module prosemirror-datagrid.
+    index: resolve(__dirname, '../../src/index.ts'),
   },
+  // https://stackoverflow.com/questions/60507612/how-to-export-multiple-es6-modules-from-one-npm-package
   output: {
-    filename: 'js/bundle.[contenthash].min.js',
+    library: 'prosemirror-datagrid',
+    libraryTarget: 'umd',    
+    // filename: 'js/bundle.[contenthash].min.js',
+    // filename: '[name].common.js',
     path: resolve(__dirname, '../../dist'),
     publicPath: '/',
+    libraryTarget: 'umd',
   },
   devtool: 'source-map',
   plugins: [],

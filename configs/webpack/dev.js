@@ -1,16 +1,27 @@
 // development config
-const { merge } = require('webpack-merge');
-const webpack = require('webpack');
-const commonConfig = require('./common');
 
-module.exports = merge(commonConfig, {
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const commonConfig = require('./common');
+const webpack = require('webpack');
+const { merge } = require('webpack-merge');
+const { resolve } = require('path');
+
+const devConfig = merge(commonConfig, {
   mode: 'development',
-  entry: {
-    example: './examples/index.tsx', // the entry point of example app
-  },
+  watch: true,
   devServer: {
-    historyApiFallback: true, // fixes error 404-ish errors when using react router :see this SO question: https://stackoverflow.com/questions/43209666/react-router-v4-cannot-get-url
+    compress: true,
+    port: 9000,
+  },
+  entry: {
+    // the entry point of example app
+    example: resolve(__dirname, '../../src/examples/example.tsx'),
   },
   devtool: 'cheap-module-source-map',
-  plugins: [],
+  plugins: [
+    // This will generate a file that containing example.js
+    new HtmlWebpackPlugin({ template: resolve(__dirname, '../../src/examples/example.html.ejs') }),
+  ],
 });
+
+module.exports = devConfig;

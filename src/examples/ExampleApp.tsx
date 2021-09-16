@@ -8,15 +8,17 @@ import { schema as baseSchema } from 'prosemirror-schema-basic';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { undo, redo, history } from 'prosemirror-history';
-import { createNodesSpec, NODE_NAME } from '../datagrid/DatagridNodeSpec';
-import insertDataGrid from '../datagrid/insertDataGrid';
-import { createDataGridNodeViewsRenderingMap } from '../datagrid/DataGridNodeView';
+import {
+  createNodeSpecMap,
+  createNodeViewsMap,
+  insertDataGrid,
+} from '../index';
 
 function createEditorState() {
   const nodes: any = baseSchema.spec.nodes;
 
   const schema = new Schema({
-    nodes: nodes.append(createNodesSpec({})),
+    nodes: nodes.append(createNodeSpecMap()),
     marks: baseSchema.spec.marks,
   });
 
@@ -49,7 +51,7 @@ function createEditorView(el: HTMLElement) {
   const editorState = createEditorState();
   const editorView = new EditorView(el, {
     state: editorState,
-    nodeViews: { ...createDataGridNodeViewsRenderingMap() },
+    nodeViews: { ...createNodeViewsMap() },
     dispatchTransaction(tr: Transaction) {
       const newState = editorView.state.apply(tr);
       editorView.updateState(newState);
