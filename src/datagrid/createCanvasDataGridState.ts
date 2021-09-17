@@ -46,7 +46,7 @@ export default function createCanvasDataGridState(props: {
   const { proseMirror } = props;
   const config = new CanvasDataGridConfig();
   const dom = createDOM();
-  const canvasBox = new Box(0, 0, 760, 400);
+  const canvasBox = new Box(0, 0, 700, 400);
   const canvas = createCanvas(dom);
   const rows = new SegmentList(DEFAULT_ROW_HEIGHT);
   const cols = new SegmentList(DEFAULT_COL_WIDTH);

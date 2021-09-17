@@ -1,6 +1,6 @@
 import { Transaction } from 'prosemirror-state';
 import { Schema } from 'prosemirror-model';
-import { NODE_NAME } from './DatagridNodeSpec';
+import { NODE_NAME } from './DataGridNodeSpec';
 import Vector from './Vector';
 import getCellEntryKey from './getCellEntryKey';
 

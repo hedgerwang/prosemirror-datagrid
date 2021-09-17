@@ -1,6 +1,6 @@
 import { Transaction } from 'prosemirror-state';
 import { Fragment, Schema } from 'prosemirror-model';
-import { NODE_NAME } from './DatagridNodeSpec';
+import { NODE_NAME } from './DataGridNodeSpec';
 import { TextSelection } from 'prosemirror-state';
 
 export default function insertDataGrid(

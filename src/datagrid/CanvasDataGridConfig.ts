@@ -24,5 +24,5 @@ export default class CanvasDataGridConfig {
   snapToGrid = false;
 
   // DEV
-  devMode = true;
+  devMode = !true;
 }

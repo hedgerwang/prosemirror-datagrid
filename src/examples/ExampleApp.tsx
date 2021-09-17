@@ -1,86 +1,127 @@
 import * as React from 'react';
 import styles from './ExampleApp.css';
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useState, useRef, useCallback, memo } from 'react';
 import { EditorView } from 'prosemirror-view';
-import { EditorState, Plugin, Transaction } from 'prosemirror-state';
-import { Schema } from 'prosemirror-model';
-import { schema as baseSchema } from 'prosemirror-schema-basic';
+import { EditorState, Transaction, Plugin } from 'prosemirror-state';
+import { Schema, DOMParser } from 'prosemirror-model';
+import { schema as basicSchema } from 'prosemirror-schema-basic';
 import { baseKeymap } from 'prosemirror-commands';
 import { keymap } from 'prosemirror-keymap';
 import { undo, redo, history } from 'prosemirror-history';
+import { addListNodes } from 'prosemirror-schema-list';
+import { dropCursor } from 'prosemirror-dropcursor';
+import { gapCursor } from 'prosemirror-gapcursor';
+import Template from './Template';
+import ToolBar from './ToolBar';
+import { render } from 'react-dom';
+
 import {
   createNodeSpecMap,
   createNodeViewsMap,
-  insertDataGrid,
-} from '../index';
+  // insertDataGrid,
+} from 'prosemirror-datagrid';
 
-function createEditorState() {
-  const nodes: any = baseSchema.spec.nodes;
+function createSchema() {
+  const nodes: any = addListNodes(
+    basicSchema.spec.nodes,
+    'paragraph block*',
+    'block',
+  );
 
   const schema = new Schema({
     nodes: nodes.append(createNodeSpecMap()),
-    marks: baseSchema.spec.marks,
+    marks: basicSchema.spec.marks,
   });
 
-  const plugins = [
+  return schema;
+}
+
+function createPlugins() {
+  return [
     history(),
+    // https://github.com/ProseMirror/prosemirror-example-setup/blob/master/src/inputrules.js
     keymap({ 'Mod-z': undo, 'Mod-Shift-z': redo }),
     keymap(baseKeymap),
+    dropCursor(),
+    gapCursor(),
   ];
+}
 
-  const state = EditorState.create({
-    doc: schema.nodeFromJSON({ type: 'doc' }),
-    schema: schema,
-    plugins,
-  });
-
-  let { tr } = state;
-  tr = tr.insertText('some text here');
-  tr = insertDataGrid(state.schema, tr);
-  tr = tr.insertText('some text here some text here some text here');
-  tr = tr.insertText('some text here');
-
+function createInitialEditorState(schema: Schema, plugins: Array<Plugin>) {
+  const dom = document.createElement('div');
+  render(<Template />, dom);
   return EditorState.create({
-    doc: schema.nodeFromJSON(state.apply(tr).doc.toJSON()),
-    schema: schema,
+    doc: DOMParser.fromSchema(schema).parse(dom),
+    schema,
     plugins,
   });
 }
 
-function createEditorView(el: HTMLElement) {
-  const editorState = createEditorState();
+const SCHEMA = createSchema();
+const PLUGINS = createPlugins();
+const INITIAL_EDITOR_STATE = createInitialEditorState(SCHEMA, PLUGINS);
+
+function createEditorView(
+  el: HTMLElement,
+  editorState: EditorState,
+  onChange: (view: EditorView) => void,
+) {
   const editorView = new EditorView(el, {
     state: editorState,
     nodeViews: { ...createNodeViewsMap() },
     dispatchTransaction(tr: Transaction) {
       const newState = editorView.state.apply(tr);
       editorView.updateState(newState);
+      onChange(editorView);
     },
   });
   return editorView;
 }
 
-export default function ExampleApp() {
-  const editorParentRef = useRef<HTMLDivElement>(null);
-
+function useEditorViewEffect(
+  onChange: (view: EditorView) => void,
+  initialEditorState: EditorState,
+  editorParentRef: React.RefObject<HTMLElement>,
+) {
   useLayoutEffect(() => {
     const el = editorParentRef.current;
     if (el) {
-      const editorView = createEditorView(el);
+      const editorView = createEditorView(el, initialEditorState, onChange);
       const timer = setTimeout(() => {
         editorView.focus();
+        onChange(editorView);
       }, 200);
       return () => {
         clearTimeout(timer);
         editorView.destroy();
       };
     }
-  }, []);
+  }, [onChange, initialEditorState, editorParentRef]);
+}
 
+const Editor = memo(
+  (props: {
+    initialEditorState: EditorState;
+    onChange: (view: EditorView) => void;
+  }) => {
+    const { onChange, initialEditorState } = props;
+    const editorParentRef = useRef<HTMLDivElement>(null);
+    useEditorViewEffect(onChange, initialEditorState, editorParentRef);
+    return <div className={styles.editor} ref={editorParentRef} />;
+  },
+);
+
+export default function ExampleApp() {
+  const [editorView, setEditorView] = useState<EditorView | null>(null);
+  const [editorState, setEditorState] = useState<EditorState | null>(null);
+  const onChange = useCallback((view: EditorView) => {
+    setEditorView(view);
+    setEditorState(view?.state || null);
+  }, []);
   return (
     <div className={styles.main}>
-      <h1>Example App</h1>
-      <div className={styles.editorParentRef} ref={editorParentRef} />
+      <ToolBar editorView={editorView} editorState={editorState} />
+      <Editor onChange={onChange} initialEditorState={INITIAL_EDITOR_STATE} />
     </div>
   );
 }

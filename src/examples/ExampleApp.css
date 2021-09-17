@@ -1,21 +1,36 @@
+body {
+  margin: 0;
+  background: #fff;
+}
+
 .main {
-  background-color: #fff;
+  background: rgb(248, 249, 250);
+  display: flex;
+  flex-direction: column;
   font-size: 16px;
-  margin: 1rem;
 }
 
-.editorParentRef :global .ProseMirror {
-  border: solid 1px #ccc;
+.editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.editor :global .ProseMirror {
+  background: #fff;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
+  flex: 1;
+  min-height: 29.7cm;
   outline: none;
-  max-width: 820px;
-  min-height: 1em;
-  min-height: 28cm;
-  min-width: 750px;
-  padding: 0 1rem;
+  padding: 5rem;
+  width: 900px;
+  margin: 1rem auto;
 }
 
-.editorParentRef :global .ProseMirror:focus {
+.editor :global .ProseMirror:focus {
   outline: none;
 }
 
