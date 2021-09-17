@@ -12,7 +12,7 @@ import { addListNodes } from 'prosemirror-schema-list';
 import { dropCursor } from 'prosemirror-dropcursor';
 import { gapCursor } from 'prosemirror-gapcursor';
 import Template from './Template';
-import ToolBar from './ToolBar';
+import Toolbar from './Toolbar';
 import { render } from 'react-dom';
 
 import {
@@ -120,7 +120,7 @@ export default function ExampleApp() {
   }, []);
   return (
     <div className={styles.main}>
-      <ToolBar editorView={editorView} editorState={editorState} />
+      <Toolbar editorView={editorView} editorState={editorState} />
       <Editor onChange={onChange} initialEditorState={INITIAL_EDITOR_STATE} />
     </div>
   );

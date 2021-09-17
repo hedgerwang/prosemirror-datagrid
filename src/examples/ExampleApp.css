@@ -3,6 +3,12 @@ body {
   background: #fff;
 }
 
+body,
+button,
+input {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
 .main {
   background: rgb(248, 249, 250);
   display: flex;
