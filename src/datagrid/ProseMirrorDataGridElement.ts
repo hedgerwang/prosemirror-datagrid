@@ -1,5 +1,3 @@
-import nullthrows from 'nullthrows';
-
 const NODE_NAME = 'pm-data-grid';
 
 function defineElement() {

@@ -88,10 +88,6 @@ export default class CellEditor {
       // Prevent ProseMirror editor from handling this event.
       e.stopImmediatePropagation();
     };
-
-    input.onchange = () => {
-      console.log(input.value);
-    };
   }
   focus() {
     const { input, state } = this;

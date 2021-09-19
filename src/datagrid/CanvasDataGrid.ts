@@ -36,20 +36,12 @@ function focusElement(el: Element, delay?: number) {
 }
 
 function renderDOM(state: CanvasDataGridState) {
-  const { proseMirror, dom, active } = state;
-  const { node } = proseMirror;
+  const { dom, active } = state;
   const el: any = dom;
-
   if (active !== el.__active) {
     el.__active = active;
     dom.setAttribute('data-active', String(active));
   }
-
-  if (el.__proseMirrorNode === node) {
-    return;
-  }
-
-  el.__proseMirrorNode = node;
 }
 
 function renderCellEditor(
