@@ -1,19 +1,15 @@
 import type { Node as ProsemirrorNode, DOMOutputSpec } from 'prosemirror-model';
+import ProseMirrorDataGridElement from './ProseMirrorDataGridElement';
 
 export const NODE_NAME = 'datagrid';
 
-export type DataGridNodeAttrs = {
+type DataGridNodeAttrs = {
   entries: {
     [key: string]: string;
   };
 };
 
-export enum DataGridNodeDOMAttrs {
-  data_grid = 'data-datagrid',
-  data_grid_entries = 'data-datagrid-entries',
-}
-
-export function parseDOMAttributes(obj: string | Node): DataGridNodeAttrs {
+function parseDOMAttributes(obj: string | Node): DataGridNodeAttrs {
   if (!(obj instanceof HTMLElement)) {
     throw new Error('Expect DOM Element');
   }
@@ -23,13 +19,10 @@ export function parseDOMAttributes(obj: string | Node): DataGridNodeAttrs {
   };
 }
 
-export function toDOMAttributes(node: ProsemirrorNode): {
+function toDOMAttributes(node: ProsemirrorNode): {
   [name: string]: string;
 } {
-  return {
-    [DataGridNodeDOMAttrs.data_grid]: 'true',
-    [DataGridNodeDOMAttrs.data_grid_entries]: '{}',
-  };
+  return {};
 }
 
 const DataGridNodeSpec = {
@@ -44,14 +37,14 @@ const DataGridNodeSpec = {
   selectable: true,
   parseDOM: [
     {
-      tag: `div[${DataGridNodeDOMAttrs.data_grid}]`,
+      tag: ProseMirrorDataGridElement.NODE_NAME,
       getAttrs: parseDOMAttributes,
     },
   ],
   toDOM(node: ProsemirrorNode): DOMOutputSpec {
     const domAttrs = toDOMAttributes(node);
-    const csvText = 'Sample CSV text';
-    return ['div', domAttrs, csvText];
+    const text = '[Data Grid]';
+    return [ProseMirrorDataGridElement.NODE_NAME, domAttrs, text];
   },
 };
 

@@ -10,9 +10,9 @@ import Vector from './Vector';
 import CellEditor from './CellEditor';
 import type { CanvasDataGridState } from './canvasDataGridState';
 import createStyleElement from './createStyleElement';
+import ProseMirrorDataGridElement from './ProseMirrorDataGridElement';
 
 const styles = CanvasDataGridSheet.locals;
-
 const DEFAULT_ROW_HEIGHT = 32;
 const DEFAULT_COL_WIDTH = 120;
 
@@ -23,21 +23,21 @@ export type ProsemirrorProps = {
   decorations: Decoration[];
 };
 
-function createDOM(): HTMLElement {
-  const dom = document.createElement('div');
+function createDOM(): ProseMirrorDataGridElement {
+  const dom = ProseMirrorDataGridElement.createElement(document);
+  dom.className = styles.main;
   dom.tabIndex = 0;
-  dom.classList.add(styles.main);
   dom.appendChild(createStyleElement(CanvasDataGridSheet));
   return dom;
 }
 
-function createCellEditor(dom: HTMLElement): any {
+function createCellEditor(dom: ProseMirrorDataGridElement): any {
   const editor = new CellEditor();
   dom.appendChild(editor.dom);
   return editor;
 }
 
-function createCanvas(dom: HTMLElement): HTMLCanvasElement {
+function createCanvas(dom: ProseMirrorDataGridElement): HTMLCanvasElement {
   const canvas = document.createElement('canvas');
   canvas.className = styles.canvas;
   dom.appendChild(canvas);

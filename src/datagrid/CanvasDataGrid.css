@@ -1,5 +1,6 @@
 .main {
   background: #ccc;
+  box-sizing: border-box;
   display: block;
   font-size: 0;
   line-height: 0;

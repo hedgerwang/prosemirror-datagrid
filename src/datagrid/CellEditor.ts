@@ -29,7 +29,6 @@ export default class CellEditor {
     this.state = new State();
     this.dom = dom;
     this.input = input;
-
     dom.appendChild(createStyleElement(CellEditorSheet));
   }
 
@@ -57,6 +56,7 @@ export default class CellEditor {
     };
 
     input.value = getCellEntryContent(state, cell.x, cell.y);
+
     input.onmousedown = (e) => {
       e.preventDefault();
     };
@@ -73,6 +73,7 @@ export default class CellEditor {
     input.onkeydown = (e: KeyboardEvent) => {
       // block prose-mirror.
       e.stopImmediatePropagation();
+      // console.log(input.parentNode?.parentNode?.parentNode?.dispatchEvent(ev));
 
       switch (e.key) {
         case 'Enter':
@@ -86,6 +87,10 @@ export default class CellEditor {
     input.onkeypress = (e: KeyboardEvent) => {
       // Prevent ProseMirror editor from handling this event.
       e.stopImmediatePropagation();
+    };
+
+    input.onchange = () => {
+      console.log(input.value);
     };
   }
   focus() {

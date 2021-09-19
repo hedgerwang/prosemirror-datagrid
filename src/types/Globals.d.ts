@@ -24,3 +24,10 @@ declare module '*.json' {
   const content: any;
   export default content;
 }
+
+// https://github.com/wes566/sample-react-ts-consumes-web-component/blob/20a236e2d54ef10a23e7688db336a41f50e9594f/README.md
+declare namespace JSX {
+  interface IntrinsicElements {
+    'pm-data-grid': any;
+  }
+}

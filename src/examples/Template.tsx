@@ -11,7 +11,7 @@ const Template = memo(() => {
         <li>list item</li>
         <li>list item</li>
       </ol>
-      <div data-datagrid="true" />
+      <pm-data-grid />
       <p>
         To apply styling, you can select a piece of text and manipulate its
         styling from the menu. The basic schema supports emphasis, strong text,

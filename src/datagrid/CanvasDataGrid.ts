@@ -4,8 +4,6 @@ import Vector from './Vector';
 import clamp from './clamp';
 import findCellAtPoint from './findCellAtPoint';
 import renderCanvasDataGrid from './renderCanvasDataGrid';
-
-import { toDOMAttributes } from './DataGridNodeSpec';
 import CellSelection from './CellSelection';
 import type {
   CanvasDataGridState,
@@ -52,14 +50,6 @@ function renderDOM(state: CanvasDataGridState) {
   }
 
   el.__proseMirrorNode = node;
-  const domAttrs = toDOMAttributes(node);
-  Object.keys(domAttrs).forEach((name) => {
-    if (name === 'className') {
-      dom[name] = domAttrs[name];
-    } else {
-      dom.setAttribute(name, domAttrs[name]);
-    }
-  });
 }
 
 function renderCellEditor(
