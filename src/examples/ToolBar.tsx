@@ -1,15 +1,18 @@
 import * as React from 'react';
 import { memo, useContext, createContext } from 'react';
-import styles from './Toolbar.css';
+import ToolbarSheet from './Toolbar.css';
 import { EditorState, Transaction, TextSelection } from 'prosemirror-state';
 import { EditorView } from 'prosemirror-view';
 import { undo, redo, undoDepth, redoDepth } from 'prosemirror-history';
 import { toggleMark } from 'prosemirror-commands';
+import Style from './Style';
 
 type ToolbarProps = {
   editorView: EditorView | null;
   editorState: EditorState | null;
 };
+
+const styles = ToolbarSheet.locals;
 
 const ToolbarContext = createContext({
   editorView: null,
@@ -227,6 +230,7 @@ function Toolbar(props: {
 }) {
   return (
     <div className={styles.toolbar}>
+      <Style cssModule={ToolbarSheet} />
       <div className={styles.toolbarRow}>
         <ToolbarContext.Provider value={props}>
           <ButtonsGroup>

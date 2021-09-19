@@ -1,13 +1,10 @@
 import Box from './Box';
-import CanvasDataGridConfig from './CanvasDataGridConfig';
 import DOMEventsHandler from './DOMEventsHandler';
-import SegmentList from './SegmentList';
 import Vector from './Vector';
 import clamp from './clamp';
 import findCellAtPoint from './findCellAtPoint';
 import renderCanvasDataGrid from './renderCanvasDataGrid';
-import styles from './CanvasDataGrid.css';
-import type { Node as ProsemirrorNode } from 'prosemirror-model';
+
 import { toDOMAttributes } from './DataGridNodeSpec';
 import CellSelection from './CellSelection';
 import type {
@@ -63,8 +60,6 @@ function renderDOM(state: CanvasDataGridState) {
       dom.setAttribute(name, domAttrs[name]);
     }
   });
-
-  dom.classList.add(styles.main);
 }
 
 function renderCellEditor(

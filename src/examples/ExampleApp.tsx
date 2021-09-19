@@ -1,5 +1,5 @@
 import * as React from 'react';
-import styles from './ExampleApp.css';
+import ExampleAppSheet from './ExampleApp.css';
 import { useLayoutEffect, useState, useRef, useCallback, memo } from 'react';
 import { EditorView } from 'prosemirror-view';
 import { EditorState, Transaction, Plugin } from 'prosemirror-state';
@@ -14,12 +14,11 @@ import { gapCursor } from 'prosemirror-gapcursor';
 import Template from './Template';
 import Toolbar from './Toolbar';
 import { render } from 'react-dom';
+import Style from './Style';
 
-import {
-  createNodeSpecMap,
-  createNodeViewsMap,
-  // insertDataGrid,
-} from 'prosemirror-datagrid';
+import { createNodeSpecMap, createNodeViewsMap } from 'prosemirror-datagrid';
+
+const styles = ExampleAppSheet.locals;
 
 function createSchema() {
   const nodes: any = addListNodes(
@@ -120,6 +119,7 @@ export default function ExampleApp() {
   }, []);
   return (
     <div className={styles.main}>
+      <Style cssModule={ExampleAppSheet} />
       <Toolbar editorView={editorView} editorState={editorState} />
       <Editor onChange={onChange} initialEditorState={INITIAL_EDITOR_STATE} />
     </div>

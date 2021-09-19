@@ -1,9 +1,12 @@
-import styles from './CellEditor.css';
+import CellEditorSheet from './CellEditor.css';
 import Vector from './Vector';
 import { ReducerDispatch } from './canvasDataGridReducer';
 import type { CanvasDataGridState } from './canvasDataGridState';
 import { closeCellEditor } from './canvasDataGridActions';
 import getCellEntryContent from './getCellEntryContent';
+import createStyleElement from './createStyleElement';
+
+const styles = CellEditorSheet.locals;
 
 class State {
   focusTimer = 0;
@@ -26,6 +29,8 @@ export default class CellEditor {
     this.state = new State();
     this.dom = dom;
     this.input = input;
+
+    dom.appendChild(createStyleElement(CellEditorSheet));
   }
 
   show(

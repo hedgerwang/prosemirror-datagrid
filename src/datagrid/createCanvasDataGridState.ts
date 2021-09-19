@@ -1,15 +1,17 @@
 import Box from './Box';
 import CanvasDataGridConfig from './CanvasDataGridConfig';
 import SegmentList from './SegmentList';
-import styles from './CanvasDataGrid.css';
+import CanvasDataGridSheet from './CanvasDataGrid.css';
 import type { Node as ProsemirrorNode } from 'prosemirror-model';
 import { Decoration } from 'prosemirror-view';
 import { EditorView } from 'prosemirror-view';
 import CellSelection from './CellSelection';
 import Vector from './Vector';
-import { ReducerDispatch } from './canvasDataGridReducer';
 import CellEditor from './CellEditor';
 import type { CanvasDataGridState } from './canvasDataGridState';
+import createStyleElement from './createStyleElement';
+
+const styles = CanvasDataGridSheet.locals;
 
 const DEFAULT_ROW_HEIGHT = 32;
 const DEFAULT_COL_WIDTH = 120;
@@ -24,6 +26,8 @@ export type ProsemirrorProps = {
 function createDOM(): HTMLElement {
   const dom = document.createElement('div');
   dom.tabIndex = 0;
+  dom.classList.add(styles.main);
+  dom.appendChild(createStyleElement(CanvasDataGridSheet));
   return dom;
 }
 
