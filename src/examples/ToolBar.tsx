@@ -6,6 +6,7 @@ import { EditorView } from 'prosemirror-view';
 import { undo, redo, undoDepth, redoDepth } from 'prosemirror-history';
 import { toggleMark } from 'prosemirror-commands';
 import Style from './Style';
+import { Fragment, Schema } from 'prosemirror-model';
 
 type ToolbarProps = {
   editorView: EditorView | null;
@@ -219,6 +220,36 @@ function Redo() {
   );
 }
 
+function Test() {
+  const { editorState, editorView } = useToolbar();
+  const onClick = () => {
+    if (editorState && editorView) {
+      focusElement(editorView.dom);
+
+      const contents = [];
+      const paragraphType = editorState.schema.nodes.paragraph;
+
+      for (let ii = 0; ii < 5; ii++) {
+        const textNode = editorState.schema.text(
+          'hello ' +
+            Math.round(Math.random() * 100)
+              .toString(16)
+              .toUpperCase(),
+        );
+        const paragraphNode = paragraphType.create({}, Fragment.from(textNode));
+        contents.push(paragraphNode);
+      }
+
+      const insertTo = editorState.selection.to;
+      const fragment = Fragment.from(contents);
+      const tr = editorState.tr.insert(editorState.selection.to, fragment);
+      const selection = TextSelection.create(tr.doc, insertTo + fragment.size);
+      editorView.dispatch(tr.setSelection(selection));
+    }
+  };
+  return <Button onClick={onClick}>Insert Texts</Button>;
+}
+
 function ButtonsGroup(props: { children: JSX.Element | JSX.Element[] }) {
   const { children } = props;
   return <span className={styles.buttonsGroup}>{children}</span>;
@@ -249,6 +280,9 @@ function Toolbar(props: {
             <Heading level={4} />
             <Heading level={5} />
             <Heading level={6} />
+          </ButtonsGroup>
+          <ButtonsGroup>
+            <Test />
           </ButtonsGroup>
         </ToolbarContext.Provider>
       </div>
