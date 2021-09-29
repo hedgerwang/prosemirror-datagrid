@@ -6,7 +6,8 @@
   "keywords": [
     "webpack",
     "typescript",
-    "babel"
+    "babel",
+    "prosemirror"
   ],
   "author": "Hedger Wang",
   "license": "MIT",
@@ -96,5 +97,8 @@
     "*.{js,ts,tsx}": [
       "eslint --fix"
     ]
+  },
+  "directories": {
+    "test": "tests"
   }
 }
