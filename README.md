@@ -1,4 +1,8 @@
-# Noteable App
+# ProseMirror Data Grid module
+
+- [DEMO](https://hedgerwang.github.io/prosemirror-datagrid/dist/demo.html)
+
+This module defines a schema extension to support datagrid with virtual scrolling and editing support.
 
 ## Installation
 
@@ -15,7 +19,7 @@
 **Production**
 
 1. Run `npm run build` and build files at the directory `/dist`.
-   ååå
+2. Open `./dist/demo.html` for local testing.
 
 ---
 
