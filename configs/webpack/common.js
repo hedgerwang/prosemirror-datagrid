@@ -1,13 +1,12 @@
 // shared config (dev and prod)
 const { resolve } = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: {
-    index: './index.tsx', // entry point for module prosemirror-datagrid.
-  },
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    alias: {
+       'prosemirror-datagrid': resolve(__dirname, '../../src/index.ts'),
+    },
   },
   context: resolve(__dirname, '../../src'),
   module: {
@@ -19,8 +18,17 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader?modules=true'],
-      },
+        // use: ['style-loader', 'css-loader?modules=true'],
+        // use: ['css-loader?modules=local'],
+        loader: 'css-loader',
+        options: {
+          modules: {
+            mode: 'local',
+            // localIdentName: '[path][name]__[local]--[hash:base64:5]',
+            localIdentName: '[name]_[local]--[hash:base64:5]',
+          }
+        }
+      },      
       {
         test: /\.(jpe?g|png|gif|svg)$/i,
         use: [
@@ -30,10 +38,7 @@ module.exports = {
       },
     ],
   },
-  plugins: [
-    // This will generate a file dist/index.html containing index.js
-    new HtmlWebpackPlugin({ template: './examples/index.html.ejs' }),
-  ],
+  plugins: [],
   externals: {},
   performance: {
     hints: false,

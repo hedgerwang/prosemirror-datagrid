@@ -1,0 +1,41 @@
+.toolbar {
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.buttonsGroup {
+  display: inline-block;
+  margin: 0 0.5rem;
+  white-space: nowrap;
+}
+
+.button {
+  all: unset;
+  color: #444;
+  border: solid 1px #cdcdcd;
+  padding: 0.3rem 1rem 0.4rem 1rem;
+  line-height: 130%;
+  display: inline-block;
+  font-size: 0.8rem;
+}
+
+.button.disabled {
+  color: #888;
+}
+
+.button.active {
+  color: #000;
+  border-color: #222;
+}
+
+.toolbarRow {
+  padding: 1rem;
+}
+
+.toolbarRuler {
+  background: rgb(232, 234, 237);
+  box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.3);
+  height: 1rem;
+}

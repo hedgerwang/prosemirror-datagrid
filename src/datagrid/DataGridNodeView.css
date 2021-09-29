@@ -1,0 +1,8 @@
+.dataGrid,
+.dataGrid:focus {
+  outline: none;
+}
+
+.dataGrid.selected {
+  box-shadow: 0 0 0 3px rgb(80, 134, 236);
+}

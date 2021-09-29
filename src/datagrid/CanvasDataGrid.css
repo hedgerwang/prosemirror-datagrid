@@ -1,0 +1,20 @@
+.main {
+  background: #ccc;
+  box-sizing: border-box;
+  display: block;
+  font-size: 0;
+  line-height: 0;
+  outline: solid 1px #ccc;
+  position: relative;
+}
+
+.main[data-active='true'] {
+  box-shadow: 0 0 3px 2px rgb(80, 134, 236);
+}
+
+.canvas {
+  background: #fff;
+  border: none;
+  outline: none;
+  margin: 0;
+}
