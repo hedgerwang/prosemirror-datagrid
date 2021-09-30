@@ -1,6 +1,6 @@
 {
   "name": "prosemirror-datagrid",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "./dist/index.umd.js",
   "description": "prosemirror-datagrid",
   "keywords": [
